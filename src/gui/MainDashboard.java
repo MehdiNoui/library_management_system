@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class AdminDashboard extends JPanel {
+public class MainDashboard extends JPanel {
     private JPanel contentPanel;
     private JPanel sidebarPanel;
     private CardLayout cardLayout;
@@ -22,7 +22,7 @@ public class AdminDashboard extends JPanel {
     private final Color SIDEBAR_SELECTED = new Color(0, 151, 167);
     private final Color TEXT_COLOR = new Color(236, 240, 241);
 
-    public AdminDashboard() {
+    public MainDashboard() {
         setLayout(new BorderLayout());
 
         // Initialize panels
@@ -32,9 +32,6 @@ public class AdminDashboard extends JPanel {
         // Add panels to main dashboard
         add(sidebarPanel, BorderLayout.WEST);
         add(contentPanel, BorderLayout.CENTER);
-
-        // Set minimum size to ensure components don't get too small
-        setMinimumSize(new Dimension(800, 600));
     }
 
     private void createSidebar() {
@@ -43,26 +40,19 @@ public class AdminDashboard extends JPanel {
         sidebarPanel.setBackground(SIDEBAR_BG);
         sidebarPanel.setPreferredSize(new Dimension(250, getHeight()));
 
-        // This ensures the sidebar maintains its width when the frame is resized
-        sidebarPanel.setMinimumSize(new Dimension(250, 0));
-        sidebarPanel.setMaximumSize(new Dimension(250, Integer.MAX_VALUE));
-
         // Logo/Title panel
-        JPanel titlePanel = new JPanel(new BorderLayout());
-        titlePanel.setBackground(SIDEBAR_BG);
-        titlePanel.setMaximumSize(new Dimension(250, 100));
-        titlePanel.setMinimumSize(new Dimension(250, 100));
-        titlePanel.setPreferredSize(new Dimension(250, 100));
-        titlePanel.setName("titlePanel"); // Add a name to identify it later
+        JPanel logoPanel = new JPanel(new BorderLayout());
+        logoPanel.setBackground(SIDEBAR_BG);
+        logoPanel.setMaximumSize(new Dimension(250, 100));
 
         JLabel titleLabel = new JLabel("Library Management");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         titleLabel.setForeground(TEXT_COLOR);
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        titlePanel.add(titleLabel, BorderLayout.CENTER);
+        logoPanel.add(titleLabel, BorderLayout.CENTER);
 
         // Add menu items
-        sidebarPanel.add(titlePanel);
+        sidebarPanel.add(logoPanel);
         sidebarPanel.add(Box.createRigidArea(new Dimension(0, 20)));
         sidebarPanel.add(createSidebarItem("Dashboard", "home", true));
         sidebarPanel.add(createSidebarItem("Books Management", "books", false));
@@ -76,7 +66,6 @@ public class AdminDashboard extends JPanel {
         JPanel logoutPanel = new JPanel(new BorderLayout());
         logoutPanel.setBackground(SIDEBAR_BG);
         logoutPanel.setMaximumSize(new Dimension(250, 60));
-        logoutPanel.setName("logoutPanel"); // Add a name to identify it later
 
         JButton logoutButton = new JButton("Logout");
         logoutButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -96,9 +85,6 @@ public class AdminDashboard extends JPanel {
         JPanel itemPanel = new JPanel(new BorderLayout());
         itemPanel.setBackground(isSelected ? SIDEBAR_SELECTED : SIDEBAR_BG);
         itemPanel.setMaximumSize(new Dimension(250, 50));
-        itemPanel.setMinimumSize(new Dimension(250, 50));
-        itemPanel.setPreferredSize(new Dimension(250, 50));
-        itemPanel.setName("menuItem"); // Add a name to identify menu items
 
         JLabel itemLabel = new JLabel(text);
         itemLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
@@ -127,8 +113,7 @@ public class AdminDashboard extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 // Reset all sidebar items background
                 for (Component component : sidebarPanel.getComponents()) {
-                    // Only change background for menu items, not title or logout panels
-                    if (component instanceof JPanel && "menuItem".equals(component.getName())) {
+                    if (component instanceof JPanel) {
                         component.setBackground(SIDEBAR_BG);
                     }
                 }
@@ -148,9 +133,6 @@ public class AdminDashboard extends JPanel {
         contentPanel = new JPanel();
         cardLayout = new CardLayout();
         contentPanel.setLayout(cardLayout);
-
-        // This ensures the content panel expands to fill available space
-        contentPanel.setMinimumSize(new Dimension(550, 600));
 
         // Initialize panels
         homePanel = new DashboardHomePanel();

@@ -1,5 +1,10 @@
 package gui;
 
+import model.Book;
+import model.Borrow;
+import model.Library;
+import model.user.User;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -34,6 +39,9 @@ public class BorrowManagementPanel extends JPanel {
     private static String[] availableUserIds = {"U001", "U002", "U003", "U004", "U005"};
     private static String[] availableUserNames = {"John Doe", "Jane Smith", "Mike Johnson", "Alice Brown", "Admin User"};
 
+    // Library instance
+    private Library library = Library.getInstance();
+
     static {
         // Initialize dates
         Calendar cal = Calendar.getInstance();
@@ -67,6 +75,24 @@ public class BorrowManagementPanel extends JPanel {
         cal.add(Calendar.DAY_OF_MONTH, 14);
         dueDates[2] = cal.getTime();
         returnDates[2] = null;
+
+        // Initialize library with sample data
+        initializeLibraryData();
+    }
+
+    private static void initializeLibraryData() {
+        Library library = Library.getInstance();
+
+        // Add sample borrows to library
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        for (int i = 0; i < borrowIds.length; i++) {
+            Borrow borrow = new Borrow(borrowIds[i], bookIds[i], userIds[i], borrowDates[i], dueDates[i]);
+            if (returnDates[i] != null) {
+                borrow.setReturnDate(returnDates[i]);
+            }
+            borrow.setStatus(statuses[i]);
+            library.getBorrows().add(borrow);
+        }
     }
 
     public BorrowManagementPanel() {
@@ -145,6 +171,9 @@ public class BorrowManagementPanel extends JPanel {
         borrowsTable.getTableHeader().setBackground(new Color(240, 240, 240));
         borrowsTable.getTableHeader().setForeground(new Color(100, 100, 100));
 
+        // Make the table fill the available space
+        borrowsTable.setFillsViewportHeight(true);
+
         // Create scroll pane
         JScrollPane scrollPane = new JScrollPane(borrowsTable);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -194,6 +223,21 @@ public class BorrowManagementPanel extends JPanel {
                         // Update status and return date
                         Date returnDate = new Date();
 
+                        // Get the borrow ID
+                        int borrowId = (int) tableModel.getValueAt(selectedRow, 0);
+
+                        // Find the borrow in the library
+                        for (Borrow borrow : library.getBorrows()) {
+                            if (borrow.getIdBorrow() == borrowId) {
+                                borrow.setReturnDate(returnDate);
+                                borrow.setStatus("returned");
+
+                                // Return the book in the library
+                                library.returnBook(borrow);
+                                break;
+                            }
+                        }
+
                         // Update table
                         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                         tableModel.setValueAt(dateFormat.format(returnDate), selectedRow, 5);
@@ -213,12 +257,14 @@ public class BorrowManagementPanel extends JPanel {
             }
         });
 
-        // Create main panel
+        // Create main panel with BorderLayout to ensure proper expansion
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
+        // Use BorderLayout for the main panel to ensure it expands properly
+        setLayout(new BorderLayout());
         add(mainPanel, BorderLayout.CENTER);
     }
 
@@ -340,9 +386,16 @@ public class BorrowManagementPanel extends JPanel {
                     String userId = userSelection.substring(userSelection.lastIndexOf("(") + 1, userSelection.lastIndexOf(")"));
                     String bookId = bookSelection.substring(bookSelection.lastIndexOf("(") + 1, bookSelection.lastIndexOf(")"));
 
+                    // Create new borrow
+                    int borrowId = Integer.parseInt(idField.getText());
+                    Borrow borrow = new Borrow(borrowId, bookId, userId, borrowDate, dueDate);
+
+                    // Add to library
+                    library.borrowForUser(borrow);
+
                     // Add to table
                     tableModel.addRow(new Object[]{
-                            idField.getText(),
+                            borrowId,
                             userSelection,
                             bookSelection,
                             dateFormat.format(borrowDate),

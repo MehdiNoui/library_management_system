@@ -156,6 +156,9 @@ public class DashboardHomePanel extends JPanel {
         table.getTableHeader().setBackground(new Color(240, 240, 240));
         table.getTableHeader().setForeground(new Color(100, 100, 100));
 
+        // Make the table fill the available space
+        table.setFillsViewportHeight(true);
+
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
 

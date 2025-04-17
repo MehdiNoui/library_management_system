@@ -102,6 +102,9 @@ public class BookManagementPanel extends JPanel {
         booksTable.getTableHeader().setBackground(new Color(240, 240, 240));
         booksTable.getTableHeader().setForeground(new Color(100, 100, 100));
 
+        // Make the table fill the available space
+        booksTable.setFillsViewportHeight(true);
+
         // Create scroll pane
         JScrollPane scrollPane = new JScrollPane(booksTable);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -226,12 +229,14 @@ public class BookManagementPanel extends JPanel {
             }
         });
 
-        // Create main panel
+        // Create main panel with BorderLayout to ensure proper expansion
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
+        // Use BorderLayout for the main panel to ensure it expands properly
+        setLayout(new BorderLayout());
         add(mainPanel, BorderLayout.CENTER);
     }
 

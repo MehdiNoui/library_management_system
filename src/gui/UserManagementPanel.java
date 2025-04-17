@@ -1,14 +1,13 @@
 package gui;
 
-import model.user.User;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class UserManagementPanel extends JPanel {
     private JTable usersTable;
@@ -18,26 +17,42 @@ public class UserManagementPanel extends JPanel {
     private JButton editButton;
     private JButton deleteButton;
 
-    // Sample data
-    private List<User> users;
+    // Static data for users
+    private static String[] userIds = {"U001", "U002", "U003", "U004", "U005"};
+    private static String[] userFirstNames = {"John", "Jane", "Mike", "Alice", "Admin"};
+    private static String[] userLastNames = {"Doe", "Smith", "Johnson", "Brown", "User"};
+    private static String[] userEmails = {"john.doe@example.com", "jane.smith@example.com", "mike.johnson@example.com", "alice.brown@example.com", "admin@library.com"};
+    private static String[] userPasswords = {"password", "password", "password", "password", "admin"};
+    private static String[] userRoles = {"reader", "reader", "reader", "reader", "admin"};
+    private static Date[] userSignupDates = new Date[5];
+
+    static {
+        // Initialize signup dates
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            userSignupDates[0] = dateFormat.parse("2023-01-15");
+            userSignupDates[1] = dateFormat.parse("2023-02-20");
+            userSignupDates[2] = dateFormat.parse("2023-03-10");
+            userSignupDates[3] = dateFormat.parse("2023-04-05");
+            userSignupDates[4] = dateFormat.parse("2023-01-01");
+        } catch (ParseException e) {
+            e.printStackTrace();
+            // If parsing fails, use current date
+            for (int i = 0; i < userSignupDates.length; i++) {
+                userSignupDates[i] = new Date();
+            }
+        }
+    }
 
     public UserManagementPanel() {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 250));
-
-        // Initialize sample data
-        initializeSampleData();
 
         // Create header panel
         createHeaderPanel();
 
         // Create table panel
         createTablePanel();
-    }
-
-    private void initializeSampleData() {
-        users = new ArrayList<>();
-
     }
 
     private void createHeaderPanel() {
@@ -79,8 +94,19 @@ public class UserManagementPanel extends JPanel {
         tableModel.addColumn("Name");
         tableModel.addColumn("Email");
         tableModel.addColumn("Role");
+        tableModel.addColumn("Signup Date");
 
         // Add data to table
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        for (int i = 0; i < userIds.length; i++) {
+            tableModel.addRow(new Object[]{
+                    userIds[i],
+                    userFirstNames[i] + " " + userLastNames[i],
+                    userEmails[i],
+                    userRoles[i],
+                    dateFormat.format(userSignupDates[i])
+            });
+        }
 
         // Create table
         usersTable = new JTable(tableModel);
@@ -89,6 +115,9 @@ public class UserManagementPanel extends JPanel {
         usersTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
         usersTable.getTableHeader().setBackground(new Color(240, 240, 240));
         usersTable.getTableHeader().setForeground(new Color(100, 100, 100));
+
+        // Make the table fill the available space
+        usersTable.setFillsViewportHeight(true);
 
         // Create scroll pane
         JScrollPane scrollPane = new JScrollPane(usersTable);
@@ -143,7 +172,6 @@ public class UserManagementPanel extends JPanel {
                     );
 
                     if (confirm == JOptionPane.YES_OPTION) {
-                        users.remove(selectedRow);
                         tableModel.removeRow(selectedRow);
                     }
                 } else {
@@ -155,18 +183,20 @@ public class UserManagementPanel extends JPanel {
             }
         });
 
-        // Create main panel
+        // Create main panel with BorderLayout to ensure proper expansion
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
+        // Use BorderLayout for the main panel to ensure it expands properly
+        setLayout(new BorderLayout());
         add(mainPanel, BorderLayout.CENTER);
     }
 
     private void showAddUserDialog() {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Add New User", true);
-        dialog.setSize(500, 350);
+        dialog.setSize(500, 400);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
 
@@ -188,53 +218,78 @@ public class UserManagementPanel extends JPanel {
         JTextField idField = new JTextField(20);
         formPanel.add(idField, gbc);
 
-        // Name Field
+        // First Name Field
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.weightx = 0.0;
-        formPanel.add(new JLabel("Name:"), gbc);
+        formPanel.add(new JLabel("First Name:"), gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 1;
         gbc.weightx = 1.0;
-        JTextField nameField = new JTextField(20);
-        formPanel.add(nameField, gbc);
+        JTextField firstNameField = new JTextField(20);
+        formPanel.add(firstNameField, gbc);
+
+        // Last Name Field
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Last Name:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.weightx = 1.0;
+        JTextField lastNameField = new JTextField(20);
+        formPanel.add(lastNameField, gbc);
 
         // Email Field
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Email:"), gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         gbc.weightx = 1.0;
         JTextField emailField = new JTextField(20);
         formPanel.add(emailField, gbc);
 
         // Password Field
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Password:"), gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         gbc.weightx = 1.0;
         JPasswordField passwordField = new JPasswordField(20);
         formPanel.add(passwordField, gbc);
 
         // Role Field
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Role:"), gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         gbc.weightx = 1.0;
-        JComboBox<String> roleComboBox = new JComboBox<>(new String[]{"member", "admin"});
+        JComboBox<String> roleComboBox = new JComboBox<>(new String[]{"reader", "admin"});
         formPanel.add(roleComboBox, gbc);
+
+        // Signup Date Field
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Signup Date:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 6;
+        gbc.weightx = 1.0;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        JTextField signupDateField = new JTextField(dateFormat.format(new Date()), 20);
+        formPanel.add(signupDateField, gbc);
 
         // Buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -249,8 +304,9 @@ public class UserManagementPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Validate input
-                if (idField.getText().isEmpty() || nameField.getText().isEmpty() ||
-                        emailField.getText().isEmpty() || passwordField.getPassword().length == 0) {
+                if (idField.getText().isEmpty() || firstNameField.getText().isEmpty() ||
+                        lastNameField.getText().isEmpty() || emailField.getText().isEmpty() ||
+                        passwordField.getPassword().length == 0 || signupDateField.getText().isEmpty()) {
 
                     JOptionPane.showMessageDialog(dialog,
                             "All fields are required.",
@@ -259,12 +315,28 @@ public class UserManagementPanel extends JPanel {
                     return;
                 }
 
+                try {
+                    // Parse date to validate format
+                    Date signupDate = dateFormat.parse(signupDateField.getText());
 
+                    // Add to table
+                    tableModel.addRow(new Object[]{
+                            idField.getText(),
+                            firstNameField.getText() + " " + lastNameField.getText(),
+                            emailField.getText(),
+                            roleComboBox.getSelectedItem(),
+                            signupDateField.getText()
+                    });
 
+                    // Close dialog
+                    dialog.dispose();
 
-
-                // Close dialog
-                dialog.dispose();
+                } catch (ParseException ex) {
+                    JOptionPane.showMessageDialog(dialog,
+                            "Invalid date format. Please use yyyy-MM-dd.",
+                            "Validation Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
@@ -281,10 +353,8 @@ public class UserManagementPanel extends JPanel {
     }
 
     private void showEditUserDialog(int rowIndex) {
-        User user = users.get(rowIndex);
-
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Edit User", true);
-        dialog.setSize(500, 350);
+        dialog.setSize(500, 400);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
 
@@ -295,6 +365,16 @@ public class UserManagementPanel extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 5, 5, 5);
 
+        // Get user data
+        String userId = (String) tableModel.getValueAt(rowIndex, 0);
+        String fullName = (String) tableModel.getValueAt(rowIndex, 1);
+        String[] nameParts = fullName.split(" ", 2);
+        String firstName = nameParts[0];
+        String lastName = nameParts.length > 1 ? nameParts[1] : "";
+        String email = (String) tableModel.getValueAt(rowIndex, 2);
+        String role = (String) tableModel.getValueAt(rowIndex, 3);
+        String signupDateStr = (String) tableModel.getValueAt(rowIndex, 4);
+
         // ID Field (read-only)
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -303,58 +383,82 @@ public class UserManagementPanel extends JPanel {
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.weightx = 1.0;
-        JTextField idField = new JTextField(user.getId(), 20);
+        JTextField idField = new JTextField(userId, 20);
         idField.setEditable(false);
         formPanel.add(idField, gbc);
 
-        // Name Field
+        // First Name Field
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.weightx = 0.0;
-        formPanel.add(new JLabel("Name:"), gbc);
+        formPanel.add(new JLabel("First Name:"), gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 1;
         gbc.weightx = 1.0;
-        JTextField nameField = new JTextField("nigger", 20);
-        formPanel.add(nameField, gbc);
+        JTextField firstNameField = new JTextField(firstName, 20);
+        formPanel.add(firstNameField, gbc);
+
+        // Last Name Field
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Last Name:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.weightx = 1.0;
+        JTextField lastNameField = new JTextField(lastName, 20);
+        formPanel.add(lastNameField, gbc);
 
         // Email Field
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Email:"), gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         gbc.weightx = 1.0;
-        JTextField emailField = new JTextField(user.getEmail(), 20);
+        JTextField emailField = new JTextField(email, 20);
         formPanel.add(emailField, gbc);
 
         // Password Field
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("New Password:"), gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         gbc.weightx = 1.0;
         JPasswordField passwordField = new JPasswordField(20);
         formPanel.add(passwordField, gbc);
 
         // Role Field
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         gbc.weightx = 0.0;
         formPanel.add(new JLabel("Role:"), gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         gbc.weightx = 1.0;
-        JComboBox<String> roleComboBox = new JComboBox<>(new String[]{"member", "admin"});
-        roleComboBox.setSelectedItem("pimp");
+        JComboBox<String> roleComboBox = new JComboBox<>(new String[]{"reader", "admin"});
+        roleComboBox.setSelectedItem(role);
         formPanel.add(roleComboBox, gbc);
+
+        // Signup Date Field
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Signup Date:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 6;
+        gbc.weightx = 1.0;
+        JTextField signupDateField = new JTextField(signupDateStr, 20);
+        formPanel.add(signupDateField, gbc);
 
         // Buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -369,21 +473,35 @@ public class UserManagementPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Validate input
-                if (nameField.getText().isEmpty() || emailField.getText().isEmpty()) {
+                if (firstNameField.getText().isEmpty() || lastNameField.getText().isEmpty() ||
+                        emailField.getText().isEmpty() || signupDateField.getText().isEmpty()) {
                     JOptionPane.showMessageDialog(dialog,
-                            "Name and email are required.",
+                            "All fields except password are required.",
                             "Validation Error",
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
+                try {
+                    // Parse date to validate format
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    dateFormat.parse(signupDateField.getText());
 
+                    // Update table
+                    tableModel.setValueAt(firstNameField.getText() + " " + lastNameField.getText(), rowIndex, 1);
+                    tableModel.setValueAt(emailField.getText(), rowIndex, 2);
+                    tableModel.setValueAt(roleComboBox.getSelectedItem(), rowIndex, 3);
+                    tableModel.setValueAt(signupDateField.getText(), rowIndex, 4);
 
+                    // Close dialog
+                    dialog.dispose();
 
-
-
-                // Close dialog
-                dialog.dispose();
+                } catch (ParseException ex) {
+                    JOptionPane.showMessageDialog(dialog,
+                            "Invalid date format. Please use yyyy-MM-dd.",
+                            "Validation Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
