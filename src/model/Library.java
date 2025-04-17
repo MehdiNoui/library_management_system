@@ -18,6 +18,9 @@ public class Library {
         booksDB = new ArrayList<>();
         borrowDB = new ArrayList<>();
         observers = new ArrayList<>();
+
+        // Initialize with some sample data
+        initializeSampleData();
     }
 
     // Singleton instance
@@ -28,11 +31,17 @@ public class Library {
         return instance;
     }
 
+    private void initializeSampleData() {
+        // This method can be used to initialize sample data
+        // We'll leave it empty for now as we're using static data in panels
+    }
+
     // Book Management
     public void addBook(Book book) {
         booksDB.add(book);
         notifyObservers(book); // Notify new book added
     }
+
     public void deleteBook(Book book) {
         booksDB.remove(book);
     }
@@ -45,6 +54,7 @@ public class Library {
         }
         return null;
     }
+
     public List<Book> getBooks() {
         return booksDB;
     }
@@ -53,12 +63,15 @@ public class Library {
     public void signUpUser(User user) {
         usersDB.add(user);
     }
+
     public void deleteUser(User user) {
         usersDB.remove(user);
     }
+
     public List<User> getUsers() {
         return usersDB;
     }
+
     public User authorizeUser(String email, String password) {
         for (User user : usersDB) {
             if (user.getEmail().equals(email) && user.getPassword().equals(password)) {
@@ -77,16 +90,35 @@ public class Library {
             notifyObservers(book);
         }
     }
+
+    public void returnBook(Borrow borrow) {
+        Book book = getBookById(borrow.getIdBook());
+        if (book != null) {
+            book.returnOne();
+        }
+    }
+
     public Date dueDateForBorrow(Borrow borrow) {
         return borrow.getDueDate();
     }
+
     public List<Borrow> getBorrows() {
         return borrowDB;
     }
+
     public Book getBookById(String idBook) {
         for (Book book : booksDB) {
             if (book.getId().equals(idBook)) {
                 return book;
+            }
+        }
+        return null;
+    }
+
+    public User getUserById(String idUser) {
+        for (User user : usersDB) {
+            if (user.getId().equals(idUser)) {
+                return user;
             }
         }
         return null;
@@ -98,12 +130,53 @@ public class Library {
             observers.add(observer);
         }
     }
+
     public void detach(User observer) {
         observers.remove(observer);
     }
+
     public void notifyObservers(Book book) {
         for (User user : observers) {
             user.update(book);
         }
+    }
+
+    // Library information
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    // Statistics
+    public int getTotalBooks() {
+        return booksDB.size();
+    }
+
+    public int getTotalUsers() {
+        return usersDB.size();
+    }
+
+    public int getActiveBorrows() {
+        int count = 0;
+        for (Borrow borrow : borrowDB) {
+            if (borrow.getReturnDate() == null) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public int getOverdueBorrows() {
+        int count = 0;
+        Date today = new Date();
+        for (Borrow borrow : borrowDB) {
+            if (borrow.getReturnDate() == null && borrow.getDueDate().before(today)) {
+                count++;
+            }
+        }
+        return count;
     }
 }

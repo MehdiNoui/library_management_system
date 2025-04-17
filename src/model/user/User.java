@@ -1,16 +1,15 @@
 package model.user;
 
 import model.Book;
-
 import java.util.Date;
 
 public abstract class User {
     protected String id;
     protected String firstname;
     protected String lastname;
-    protected Date signupDate;
     protected String email;
     protected String password;
+    protected Date signupDate;
     protected BorrowStrategy borrowStrategy;
 
     public User(String id, String firstname, String lastname, String email, String password, Date signupDate) {
@@ -22,23 +21,48 @@ public abstract class User {
         this.signupDate = signupDate;
     }
 
-    public void setBorrowStrategy(BorrowStrategy strategy) {
-        this.borrowStrategy = strategy;
+    public String getId() {
+        return id;
     }
-    public boolean canBorrow() {
-        return borrowStrategy != null && borrowStrategy.canBorrow(this);
-    }
-    public abstract boolean manage();
-    public abstract void update(Book book);
 
-    // Getters
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
     public String getEmail() {
         return email;
     }
+
     public String getPassword() {
         return password;
     }
-    public String getId() {
-        return id;
+
+    public Date getSignupDate() {
+        return signupDate;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public boolean borrow(Book book) {
+        return borrowStrategy.borrow(book);
+    }
+
+    public abstract boolean manage();
+
+    public abstract void update(Book book);
+
+    @Override
+    public String toString() {
+        return firstname + " " + lastname + " (" + email + ")";
     }
 }

@@ -1,18 +1,15 @@
 package model.user;
 
-import model.Borrow;
-import model.Library;
+import model.Book;
 
 public class ReaderBorrowStrategy implements BorrowStrategy {
-    private static final int MAX_BORROW = 3;
     @Override
-    public boolean canBorrow(User user) {
-        int activeBorrows = 0;
-        for (Borrow borrow : Library.getInstance().getBorrows()) {
-            if (borrow.getIdUser().equals(user.getId())) {
-                activeBorrows++;
-            }
+    public boolean borrow(Book book) {
+        // Standard borrowing logic for readers
+        if (book.getAvailableBooks() > 0) {
+            book.setAvailableBooks(book.getAvailableBooks() - 1);
+            return true;
         }
-        return activeBorrows < MAX_BORROW;
+        return false;
     }
 }
