@@ -1,5 +1,9 @@
 package gui;
 
+import model.Book;
+import model.Borrow;
+import model.Library;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -10,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class BookManagementPanel extends JPanel {
+    private Library lib = Library.getInstance();
     private JTable booksTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
@@ -18,24 +23,29 @@ public class BookManagementPanel extends JPanel {
     private JButton deleteButton;
     private JButton restockButton;
 
-    // Static data for books
-    private static String[] bookIds = {"B001", "B002", "B003", "B004", "B005"};
-    private static String[] bookNames = {"The Great Gatsby", "To Kill a Mockingbird", "1984", "Pride and Prejudice", "The Hobbit"};
-    private static String[] authorNames = {"F. Scott Fitzgerald", "Harper Lee", "George Orwell", "Jane Austen", "J.R.R. Tolkien"};
-    private static String[] publishDates = {"1925-04-10", "1960-07-11", "1949-06-08", "1813-01-28", "1937-09-21"};
-    private static String[] genres = {"Fiction", "Fiction", "Science Fiction", "Romance", "Fantasy"};
-    private static int[] stockBooks = {10, 8, 12, 6, 15};
-    private static int[] availableBooks = {10, 8, 12, 6, 15};
-
     public BookManagementPanel() {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 250));
-
         // Create header panel
         createHeaderPanel();
-
         // Create table panel
         createTablePanel();
+    }
+
+    private void refreshTable() {
+        tableModel.setRowCount(0); // Clear the table
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        for (Book book : lib.getBooks()) {
+            tableModel.addRow(new Object[]{
+                    book.getId(),
+                    book.getBookName(),
+                    book.getAuthorName(),
+                    sdf.format(book.getPublishDate()),
+                    book.getGenre(),
+                    book.getStockBooks(),
+                    book.getAvailableBooks()
+            });
+        }
     }
 
     private void createHeaderPanel() {
@@ -71,7 +81,7 @@ public class BookManagementPanel extends JPanel {
                 return false;
             }
         };
-
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         // Add columns
         tableModel.addColumn("ID");
         tableModel.addColumn("Book Name");
@@ -82,15 +92,16 @@ public class BookManagementPanel extends JPanel {
         tableModel.addColumn("Available");
 
         // Add data to table
-        for (int i = 0; i < bookIds.length; i++) {
+        java.util.List<Book> books = lib.getBooks();
+        for (Book book : lib.getBooks()) {
             tableModel.addRow(new Object[]{
-                    bookIds[i],
-                    bookNames[i],
-                    authorNames[i],
-                    publishDates[i],
-                    genres[i],
-                    stockBooks[i],
-                    availableBooks[i]
+                    book.getId(),
+                    book.getBookName(),
+                    book.getAuthorName(),
+                    sdf.format(book.getPublishDate()),
+                    book.getGenre(),
+                    book.getStockBooks(),
+                    book.getAvailableBooks()
             });
         }
 
@@ -104,11 +115,9 @@ public class BookManagementPanel extends JPanel {
 
         // Make the table fill the available space
         booksTable.setFillsViewportHeight(true);
-
         // Create scroll pane
         JScrollPane scrollPane = new JScrollPane(booksTable);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
-
         // Create button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         buttonPanel.setBackground(new Color(245, 245, 250));
@@ -124,14 +133,15 @@ public class BookManagementPanel extends JPanel {
         buttonPanel.add(deleteButton);
         buttonPanel.add(restockButton);
 
-        // Add action listeners
+        // Action listeners
+        // Add button functionality + dialog down below
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 showAddBookDialog();
             }
         });
-
+        // Edit button functionality + dialog down below
         editButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -146,7 +156,7 @@ public class BookManagementPanel extends JPanel {
                 }
             }
         });
-
+        // Delete functionality
         deleteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -158,10 +168,11 @@ public class BookManagementPanel extends JPanel {
                             "Confirm Deletion",
                             JOptionPane.YES_NO_OPTION
                     );
-
                     if (confirm == JOptionPane.YES_OPTION) {
-                        // Remove the row from the table
+                        String bookId = (String) tableModel.getValueAt(selectedRow, 0);
+                        lib.deleteBook(bookId);
                         tableModel.removeRow(selectedRow);
+                        refreshTable();
                     }
                 } else {
                     JOptionPane.showMessageDialog(BookManagementPanel.this,
@@ -171,7 +182,7 @@ public class BookManagementPanel extends JPanel {
                 }
             }
         });
-
+        // Restock functionality
         restockButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -183,18 +194,28 @@ public class BookManagementPanel extends JPanel {
                             "Restock Book",
                             JOptionPane.PLAIN_MESSAGE
                     );
-
                     if (input != null && !input.isEmpty()) {
                         try {
                             int quantity = Integer.parseInt(input);
                             if (quantity > 0) {
-                                // Update stock and available counts
+                                // Update stock and available counts in table
                                 int currentStock = (int) tableModel.getValueAt(selectedRow, 5);
                                 int currentAvailable = (int) tableModel.getValueAt(selectedRow, 6);
+                                int newStock = currentStock + quantity;
+                                int newAvailable = currentAvailable + quantity;
 
-                                tableModel.setValueAt(currentStock + quantity, selectedRow, 5);
-                                tableModel.setValueAt(currentAvailable + quantity, selectedRow, 6);
-
+                                tableModel.setValueAt(newStock, selectedRow, 5);
+                                tableModel.setValueAt(newAvailable, selectedRow, 6);
+                                // Also update the Book object in the library
+                                String bookId = (String) tableModel.getValueAt(selectedRow, 0);
+                                for (Book book : lib.getBooks()) {
+                                    if (book.getId().equals(bookId)) {
+                                        book.setStockBooks(newStock);
+                                        book.setAvailableBooks(newAvailable);
+                                        refreshTable();
+                                        break;
+                                    }
+                                }
                                 JOptionPane.showMessageDialog(
                                         BookManagementPanel.this,
                                         "Successfully restocked " + quantity + " copies.",
@@ -228,14 +249,10 @@ public class BookManagementPanel extends JPanel {
                 }
             }
         });
-
-        // Create main panel with BorderLayout to ensure proper expansion
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
-
-        // Use BorderLayout for the main panel to ensure it expands properly
         setLayout(new BorderLayout());
         add(mainPanel, BorderLayout.CENTER);
     }
@@ -332,6 +349,7 @@ public class BookManagementPanel extends JPanel {
         buttonPanel.add(saveButton);
         buttonPanel.add(cancelButton);
 
+
         // Add action listeners
         saveButton.addActionListener(new ActionListener() {
             @Override
@@ -340,22 +358,18 @@ public class BookManagementPanel extends JPanel {
                 if (idField.getText().isEmpty() || nameField.getText().isEmpty() ||
                         authorField.getText().isEmpty() || dateField.getText().isEmpty() ||
                         genreField.getText().isEmpty() || stockField.getText().isEmpty()) {
-
                     JOptionPane.showMessageDialog(dialog,
                             "All fields are required.",
                             "Validation Error",
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-
                 try {
                     // Parse date to validate format
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                    dateFormat.parse(dateField.getText());
-
+                    Date pubDate = dateFormat.parse(dateField.getText());
                     // Parse stock
                     int stock = Integer.parseInt(stockField.getText());
-
                     if (stock < 0) {
                         JOptionPane.showMessageDialog(dialog,
                                 "Stock cannot be negative.",
@@ -363,19 +377,16 @@ public class BookManagementPanel extends JPanel {
                                 JOptionPane.ERROR_MESSAGE);
                         return;
                     }
-
-                    // Add to table
-                    tableModel.addRow(new Object[]{
+                    Book newBook = new Book(
                             idField.getText(),
                             nameField.getText(),
                             authorField.getText(),
-                            dateField.getText(),
+                            pubDate,
                             genreField.getText(),
-                            stock,
                             stock
-                    });
-
-                    // Close dialog
+                    );
+                    lib.addBook(newBook);
+                    refreshTable();
                     dialog.dispose();
 
                 } catch (ParseException ex) {
@@ -385,13 +396,12 @@ public class BookManagementPanel extends JPanel {
                             JOptionPane.ERROR_MESSAGE);
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(dialog,
-                            "Stock must be a number.",
+                            "ID and Stock must be numbers.",
                             "Validation Error",
                             JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
-
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -516,11 +526,10 @@ public class BookManagementPanel extends JPanel {
                 try {
                     // Parse date
                     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                    dateFormat.parse(dateField.getText());
+                    Date publishDate = dateFormat.parse(dateField.getText());
 
                     // Parse stock
                     int stock = Integer.parseInt(stockField.getText());
-
                     if (stock < 0) {
                         JOptionPane.showMessageDialog(dialog,
                                 "Stock cannot be negative.",
@@ -529,15 +538,16 @@ public class BookManagementPanel extends JPanel {
                         return;
                     }
 
-                    // Update table
-                    tableModel.setValueAt(nameField.getText(), rowIndex, 1);
-                    tableModel.setValueAt(authorField.getText(), rowIndex, 2);
-                    tableModel.setValueAt(dateField.getText(), rowIndex, 3);
-                    tableModel.setValueAt(genreField.getText(), rowIndex, 4);
-                    tableModel.setValueAt(stock, rowIndex, 5);
-                    tableModel.setValueAt(stock, rowIndex, 6); // Simplified for this example
+                    // Update the corresponding Book object
+                    Book bookToEdit = lib.getBooks().get(rowIndex);
+                    bookToEdit.setBookName(nameField.getText());
+                    bookToEdit.setAuthorName(authorField.getText());
+                    bookToEdit.setGenre(genreField.getText());
+                    bookToEdit.setPublishDate(publishDate);
+                    bookToEdit.setStockBooks(stock);
+                    bookToEdit.setAvailableBooks(stock); // adjust if you track checked-out books separately
 
-                    // Close dialog
+                    refreshTable();
                     dialog.dispose();
 
                 } catch (ParseException ex) {
@@ -554,12 +564,7 @@ public class BookManagementPanel extends JPanel {
             }
         });
 
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dialog.dispose();
-            }
-        });
+        cancelButton.addActionListener(e -> dialog.dispose());
 
         dialog.add(formPanel, BorderLayout.CENTER);
         dialog.add(buttonPanel, BorderLayout.SOUTH);
