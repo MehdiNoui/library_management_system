@@ -28,19 +28,18 @@ public abstract class User {
     public String getFirstname() {
         return firstname;
     }
-
     public String getLastname() {
         return lastname;
     }
-
     public String getEmail() {
         return email;
     }
-
+    public String getFullName() {
+        return firstname + " " + lastname;
+    }
     public String getPassword() {
         return password;
     }
-
     public Date getSignupDate() {
         return signupDate;
     }
