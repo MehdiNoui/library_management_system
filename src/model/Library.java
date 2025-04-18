@@ -15,12 +15,15 @@ public class Library {
 
     private Library() {
         usersDB = new ArrayList<>();
-        booksDB = new ArrayList<>();
+        booksDB = new ArrayList<>(List.of(
+                new Book("1", "1984", "George Orwell", new Date(), "Dystopian", 10),
+                new Book("2", "To Kill a Mockingbird", "Harper Lee", new Date(), "Classic", 8),
+                new Book("3", "The Great Gatsby", "F. Scott Fitzgerald", new Date(), "Classic", 5),
+                new Book("4", "The Great Gatsby", "F. Scott Fitzgerald", new Date(), "Classic", 5),
+                new Book("5", "The Great Gatsby", "F. Scott Fitzgerald", new Date(), "Classic", 5)
+        ));
         borrowDB = new ArrayList<>();
         observers = new ArrayList<>();
-
-        // Initialize with some sample data
-        initializeSampleData();
     }
 
     // Singleton instance
@@ -31,18 +34,13 @@ public class Library {
         return instance;
     }
 
-    private void initializeSampleData() {
-
-
-    }
-
     // Book Management
     public void addBook(Book book) {
         booksDB.add(book);
         notifyObservers(book); // Notify new book added
     }
-    public void deleteBook(Book book) {
-        booksDB.remove(book);
+    public void deleteBook(String bookId) {
+        booksDB.removeIf(book -> book.getId().equals(bookId));
     }
     public Book searchBookByTitle(String title) {
         for (Book book : booksDB) {
