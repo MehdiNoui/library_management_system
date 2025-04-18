@@ -16,12 +16,12 @@ public class DashboardHomePanel extends JPanel {
     private JLabel timeLabel;
     private JLabel dateLabel;
     private Timer timer;
+
     // Dashboard statistics
     private JLabel totalBooksLabel;
     private JLabel totalUsersLabel;
     private JLabel activeBorrowsLabel;
     private JLabel overdueBorrowsLabel;
-
     public DashboardHomePanel() {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 250));
@@ -34,7 +34,6 @@ public class DashboardHomePanel extends JPanel {
         // Start the timer to update time
         startTimer();
     }
-
     private void createHeaderPanel() {
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(new Color(255, 255, 255));
@@ -42,6 +41,19 @@ public class DashboardHomePanel extends JPanel {
 
         JLabel welcomeLabel = new JLabel("Welcome, Administrator");
         welcomeLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+
+        // Refresh button
+        JButton refreshButton = new JButton("⟳ Refresh");
+        refreshButton.setFocusPainted(false);
+        refreshButton.setBackground(new Color(52, 152, 219));
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        refreshButton.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
+        refreshButton.addActionListener(e -> refreshDashboardPanel());
+
+        // Right side (time + button)
+        JPanel rightPanel = new JPanel(new BorderLayout());
+        rightPanel.setBackground(new Color(255, 255, 255));
 
         JPanel timePanel = new JPanel(new GridLayout(2, 1));
         timePanel.setBackground(new Color(255, 255, 255));
@@ -59,10 +71,21 @@ public class DashboardHomePanel extends JPanel {
         timePanel.add(timeLabel);
         timePanel.add(dateLabel);
 
+        rightPanel.add(timePanel, BorderLayout.CENTER);
+        rightPanel.add(refreshButton, BorderLayout.SOUTH);
+
         headerPanel.add(welcomeLabel, BorderLayout.WEST);
-        headerPanel.add(timePanel, BorderLayout.EAST);
+        headerPanel.add(rightPanel, BorderLayout.EAST);
 
         add(headerPanel, BorderLayout.NORTH);
+    }
+    public void refreshDashboardPanel() {
+        removeAll();
+        createHeaderPanel();
+        createStatisticsPanel();
+        createRecentActivitiesPanel();
+        revalidate();
+        repaint();
     }
 
     private void createStatisticsPanel() {
@@ -100,7 +123,6 @@ public class DashboardHomePanel extends JPanel {
         centerPanel.add(statsContainer, BorderLayout.NORTH);
         add(centerPanel, BorderLayout.CENTER);
     }
-
     private JPanel createStatCard(String title, String value, Color color) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
@@ -127,7 +149,6 @@ public class DashboardHomePanel extends JPanel {
         panel.add(colorBar, BorderLayout.SOUTH);
         return panel;
     }
-
     private void createRecentActivitiesPanel() {
         JPanel activitiesPanel = new JPanel(new BorderLayout());
         activitiesPanel.setBackground(Color.WHITE);
@@ -142,9 +163,8 @@ public class DashboardHomePanel extends JPanel {
         JLabel titleLabel = new JLabel("Recent Activities");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
 
-        // Sample data for the table
         String[] columnNames = {"Activity", "User", "Book", "Date"};
-        java.util.List<Borrow> borrows = Library.getInstance().getBorrows();
+        java.util.List<Borrow> borrows = lib.getBorrows();
         Object[][] data = new Object[borrows.size()][4];
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -152,10 +172,10 @@ public class DashboardHomePanel extends JPanel {
         for (int i = 0; i < borrows.size(); i++) {
             Borrow b = borrows.get(i);
             String activity = (b.getReturnDate() == null) ? "Book Borrowed" : "Book Returned";
-            String userName = Library.getInstance().getUserById(b.getIdUser()) != null ?
-                    Library.getInstance().getUserById(b.getIdUser()).getFullName() : "Unknown User";
-            String bookTitle = Library.getInstance().getBookById(b.getIdBook()) != null ?
-                    Library.getInstance().getBookById(b.getIdBook()).getBookName() : "Unknown Book";
+            String userName =lib.getUserById(b.getIdUser()) != null ?
+                    lib.getUserById(b.getIdUser()).getFullName() : "Unknown User";
+            String bookTitle =lib.getBookById(b.getIdBook()) != null ?
+                    lib.getBookById(b.getIdBook()).getBookName() : "Unknown Book";
             Date date = (b.getReturnDate() != null) ? b.getReturnDate() : b.getBorrowDate();
 
             data[i][0] = activity;
@@ -184,8 +204,6 @@ public class DashboardHomePanel extends JPanel {
         JPanel centerPanel = (JPanel) getComponent(1);
         centerPanel.add(activitiesPanel, BorderLayout.CENTER);
     }
-
-
     private void updateTimeAndDate() {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
         SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE, MMMM d, yyyy");
@@ -202,7 +220,6 @@ public class DashboardHomePanel extends JPanel {
         });
         timer.start();
     }
-    // Stop the timer when the panel is no longer visible
     @Override
     public void removeNotify() {
         super.removeNotify();
