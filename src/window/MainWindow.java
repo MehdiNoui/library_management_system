@@ -11,7 +11,7 @@ public class MainWindow extends JFrame {
 
     public MainWindow() {
         setTitle("Library System");
-        setSize(600, 400);
+        setSize(1000, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
