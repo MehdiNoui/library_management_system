@@ -74,7 +74,6 @@ public class BookManagementPanel extends JPanel {
     }
 
     private void createTablePanel() {
-        // Create table model with non-editable cells
         tableModel = new DefaultTableModel() {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -90,7 +89,6 @@ public class BookManagementPanel extends JPanel {
         tableModel.addColumn("Genre");
         tableModel.addColumn("Stock");
         tableModel.addColumn("Available");
-
         // Add data to table
         java.util.List<Book> books = lib.getBooks();
         for (Book book : lib.getBooks()) {
@@ -104,15 +102,14 @@ public class BookManagementPanel extends JPanel {
                     book.getAvailableBooks()
             });
         }
-
         // Create table
         booksTable = new JTable(tableModel);
+        // Table editing
         booksTable.setRowHeight(30);
         booksTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         booksTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
         booksTable.getTableHeader().setBackground(new Color(240, 240, 240));
         booksTable.getTableHeader().setForeground(new Color(100, 100, 100));
-
         // Make the table fill the available space
         booksTable.setFillsViewportHeight(true);
         // Create scroll pane
@@ -127,7 +124,6 @@ public class BookManagementPanel extends JPanel {
         editButton = new JButton("Edit Book");
         deleteButton = new JButton("Delete Book");
         restockButton = new JButton("Restock");
-
         buttonPanel.add(addButton);
         buttonPanel.add(editButton);
         buttonPanel.add(deleteButton);
@@ -249,14 +245,17 @@ public class BookManagementPanel extends JPanel {
                 }
             }
         });
+        // Create main panel with BorderLayout to ensure proper expansion
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
+        // Use BorderLayout for the main panel to ensure it expands properly
         setLayout(new BorderLayout());
         add(mainPanel, BorderLayout.CENTER);
     }
 
+    // Dialog functionality
     private void showAddBookDialog() {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Add New Book", true);
         dialog.setSize(500, 400);
@@ -413,7 +412,6 @@ public class BookManagementPanel extends JPanel {
         dialog.add(buttonPanel, BorderLayout.SOUTH);
         dialog.setVisible(true);
     }
-
     private void showEditBookDialog(int rowIndex) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Edit Book", true);
         dialog.setSize(500, 400);
