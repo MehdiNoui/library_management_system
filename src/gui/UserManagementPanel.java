@@ -165,7 +165,7 @@ public class UserManagementPanel extends JPanel {
 
                     if (confirm == JOptionPane.YES_OPTION) {
                         String userId = (String) tableModel.getValueAt(selectedRow, 0);
-                        lib.deleteBook(userId);
+                        lib.deleteUser(userId);
                         tableModel.removeRow(selectedRow);
                         refreshTable();
                     }
@@ -312,6 +312,8 @@ public class UserManagementPanel extends JPanel {
                     // Parse date to validate format
                     Date signupDate = dateFormat.parse(signupDateField.getText());
                     // Add to table
+
+                    // Check role if reader = new reader or admin = new admin
                     User newUser = new Reader(
                             idField.getText(),
                             firstNameField.getText(),

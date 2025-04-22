@@ -58,8 +58,8 @@ public class Library {
     public void signUpUser(User user) {
         usersDB.add(user);
     }
-    public void deleteUser(User user) {
-        usersDB.remove(user);
+    public void deleteUser(String userId) {
+        usersDB.removeIf(user -> user.getId().equals(userId));
     }
     public List<User> getUsers() {
         return usersDB;
