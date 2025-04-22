@@ -2,6 +2,7 @@ package gui;
 
 import model.Book;
 import model.Library;
+import model.user.Admin;
 import model.user.Reader;
 import model.user.User;
 
@@ -40,9 +41,9 @@ public class UserManagementPanel extends JPanel {
                     user.getId(),
                     user.getFirstname(),
                     user.getLastname(),
-                    sdf.format(user.getSignupDate()),
                     user.getEmail(),
-                    user.getPassword(),
+                    sdf.format(user.getSignupDate()),
+
             });
         }
     }
@@ -88,7 +89,7 @@ public class UserManagementPanel extends JPanel {
         tableModel.addColumn("Last Name");
         tableModel.addColumn("Signup Date");
         tableModel.addColumn("Email");
-        tableModel.addColumn("Password");
+
         // Add data to table
         java.util.List<User> users = lib.getUsers();
         for (User user : lib.getUsers()) {
@@ -97,8 +98,7 @@ public class UserManagementPanel extends JPanel {
                     user.getFirstname(),
                     user.getLastname(),
                     sdf.format(user.getSignupDate()),
-                    user.getEmail(),
-                    user.getPassword(),
+                    user.getEmail()
             });
         }
 
@@ -313,15 +313,26 @@ public class UserManagementPanel extends JPanel {
                     Date signupDate = dateFormat.parse(signupDateField.getText());
                     // Add to table
 
-                    // Check role if reader = new reader or admin = new admin
-                    User newUser = new Reader(
-                            idField.getText(),
-                            firstNameField.getText(),
-                            lastNameField.getText(),
-                            emailField.getText(),
-                            passwordField.getText(),
-                            signupDate
-                    );
+                    User newUser;
+                    if (roleComboBox.getSelectedItem().equals("admin")) {
+                        newUser = new Admin(
+                                idField.getText(),
+                                firstNameField.getText(),
+                                lastNameField.getText(),
+                                emailField.getText(),
+                                passwordField.getText(),
+                                signupDate
+                        );
+                    } else {
+                        newUser = new Reader(
+                                idField.getText(),
+                                firstNameField.getText(),
+                                lastNameField.getText(),
+                                emailField.getText(),
+                                passwordField.getText(),
+                                signupDate
+                        );
+                    }
                     lib.signUpUser(newUser);
                     refreshTable();
                     dialog.dispose();
