@@ -1,5 +1,10 @@
 package gui;
 
+import model.Book;
+import model.Library;
+import model.user.Reader;
+import model.user.User;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -10,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class UserManagementPanel extends JPanel {
+    private Library lib = Library.getInstance();
     private JTable usersTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
@@ -17,42 +23,28 @@ public class UserManagementPanel extends JPanel {
     private JButton editButton;
     private JButton deleteButton;
 
-    // Static data for users
-    private static String[] userIds = {"U001", "U002", "U003", "U004", "U005"};
-    private static String[] userFirstNames = {"John", "Jane", "Mike", "Alice", "Admin"};
-    private static String[] userLastNames = {"Doe", "Smith", "Johnson", "Brown", "User"};
-    private static String[] userEmails = {"john.doe@example.com", "jane.smith@example.com", "mike.johnson@example.com", "alice.brown@example.com", "admin@library.com"};
-    private static String[] userPasswords = {"password", "password", "password", "password", "admin"};
-    private static String[] userRoles = {"reader", "reader", "reader", "reader", "admin"};
-    private static Date[] userSignupDates = new Date[5];
-
-    static {
-        // Initialize signup dates
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            userSignupDates[0] = dateFormat.parse("2023-01-15");
-            userSignupDates[1] = dateFormat.parse("2023-02-20");
-            userSignupDates[2] = dateFormat.parse("2023-03-10");
-            userSignupDates[3] = dateFormat.parse("2023-04-05");
-            userSignupDates[4] = dateFormat.parse("2023-01-01");
-        } catch (ParseException e) {
-            e.printStackTrace();
-            // If parsing fails, use current date
-            for (int i = 0; i < userSignupDates.length; i++) {
-                userSignupDates[i] = new Date();
-            }
-        }
-    }
-
     public UserManagementPanel() {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 250));
-
         // Create header panel
         createHeaderPanel();
-
         // Create table panel
         createTablePanel();
+    }
+
+    private void refreshTable() {
+        tableModel.setRowCount(0); // Clear the table
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        for (User user : lib.getUsers()) {
+            tableModel.addRow(new Object[]{
+                    user.getId(),
+                    user.getFirstname(),
+                    user.getLastname(),
+                    sdf.format(user.getSignupDate()),
+                    user.getEmail(),
+                    user.getPassword(),
+            });
+        }
     }
 
     private void createHeaderPanel() {
@@ -88,41 +80,41 @@ public class UserManagementPanel extends JPanel {
                 return false;
             }
         };
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
         // Add columns
         tableModel.addColumn("ID");
-        tableModel.addColumn("Name");
-        tableModel.addColumn("Email");
-        tableModel.addColumn("Role");
+        tableModel.addColumn("First Name");
+        tableModel.addColumn("Last Name");
         tableModel.addColumn("Signup Date");
-
+        tableModel.addColumn("Email");
+        tableModel.addColumn("Password");
         // Add data to table
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        for (int i = 0; i < userIds.length; i++) {
+        java.util.List<User> users = lib.getUsers();
+        for (User user : lib.getUsers()) {
             tableModel.addRow(new Object[]{
-                    userIds[i],
-                    userFirstNames[i] + " " + userLastNames[i],
-                    userEmails[i],
-                    userRoles[i],
-                    dateFormat.format(userSignupDates[i])
+                    user.getId(),
+                    user.getFirstname(),
+                    user.getLastname(),
+                    sdf.format(user.getSignupDate()),
+                    user.getEmail(),
+                    user.getPassword(),
             });
         }
 
         // Create table
         usersTable = new JTable(tableModel);
+        // Table editing
         usersTable.setRowHeight(30);
         usersTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         usersTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
         usersTable.getTableHeader().setBackground(new Color(240, 240, 240));
         usersTable.getTableHeader().setForeground(new Color(100, 100, 100));
-
         // Make the table fill the available space
         usersTable.setFillsViewportHeight(true);
-
         // Create scroll pane
         JScrollPane scrollPane = new JScrollPane(usersTable);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
-
         // Create button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         buttonPanel.setBackground(new Color(245, 245, 250));
@@ -131,19 +123,19 @@ public class UserManagementPanel extends JPanel {
         addButton = new JButton("Add User");
         editButton = new JButton("Edit User");
         deleteButton = new JButton("Delete User");
-
         buttonPanel.add(addButton);
         buttonPanel.add(editButton);
         buttonPanel.add(deleteButton);
 
         // Add action listeners
+        // Add button functionality + dialog down below
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 showAddUserDialog();
             }
         });
-
+        // Edit button functionality + dialog down below
         editButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -158,7 +150,7 @@ public class UserManagementPanel extends JPanel {
                 }
             }
         });
-
+        // Delete functionality
         deleteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -172,7 +164,10 @@ public class UserManagementPanel extends JPanel {
                     );
 
                     if (confirm == JOptionPane.YES_OPTION) {
+                        String userId = (String) tableModel.getValueAt(selectedRow, 0);
+                        lib.deleteBook(userId);
                         tableModel.removeRow(selectedRow);
+                        refreshTable();
                     }
                 } else {
                     JOptionPane.showMessageDialog(UserManagementPanel.this,
@@ -182,13 +177,11 @@ public class UserManagementPanel extends JPanel {
                 }
             }
         });
-
         // Create main panel with BorderLayout to ensure proper expansion
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
-
         // Use BorderLayout for the main panel to ensure it expands properly
         setLayout(new BorderLayout());
         add(mainPanel, BorderLayout.CENTER);
@@ -318,19 +311,18 @@ public class UserManagementPanel extends JPanel {
                 try {
                     // Parse date to validate format
                     Date signupDate = dateFormat.parse(signupDateField.getText());
-
                     // Add to table
-                    tableModel.addRow(new Object[]{
+                    User newUser = new Reader(
                             idField.getText(),
-                            firstNameField.getText() + " " + lastNameField.getText(),
+                            firstNameField.getText(),
+                            lastNameField.getText(),
                             emailField.getText(),
-                            roleComboBox.getSelectedItem(),
-                            signupDateField.getText()
-                    });
-
-                    // Close dialog
+                            passwordField.getText(),
+                            signupDate
+                    );
+                    lib.signUpUser(newUser);
+                    refreshTable();
                     dialog.dispose();
-
                 } catch (ParseException ex) {
                     JOptionPane.showMessageDialog(dialog,
                             "Invalid date format. Please use yyyy-MM-dd.",
@@ -339,7 +331,6 @@ public class UserManagementPanel extends JPanel {
                 }
             }
         });
-
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
