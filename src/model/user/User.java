@@ -25,9 +25,7 @@ public abstract class User {
         return id;
     }
 
-    public String getFirstname() {
-        return firstname;
-    }
+    public String getFirstname() { return firstname; }
     public String getLastname() {
         return lastname;
     }
@@ -43,6 +41,7 @@ public abstract class User {
     public Date getSignupDate() {
         return signupDate;
     }
+    public abstract String getRole();
 
     public void setFirstname(String firstname){ this.firstname = firstname;}
     public void setLastname(String lastname){ this.lastname = lastname;}

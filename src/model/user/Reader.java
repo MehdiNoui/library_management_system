@@ -14,9 +14,12 @@ public class Reader extends User {
     public boolean manage() {
         return false;
     }
-
     @Override
     public void update(Book book) {
         System.out.println("Reader " + firstname + " notified about book: " + book.getBookName());
+    }
+    @Override
+    public String getRole() {
+        return "Reader";
     }
 }

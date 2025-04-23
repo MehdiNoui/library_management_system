@@ -17,4 +17,8 @@ public class Admin extends User {
     public void update(Book book) {
         System.out.println("Admin " + firstname + " notified about book: " + book.getBookName());
     }
+    @Override
+    public String getRole() {
+        return "Admin";
+    }
 }
