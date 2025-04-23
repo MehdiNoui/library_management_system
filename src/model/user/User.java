@@ -44,13 +44,11 @@ public abstract class User {
         return signupDate;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public void setFirstname(String firstname){ this.firstname = firstname;}
+    public void setLastname(String lastname){ this.lastname = lastname;}
+    public void setPassword(String password) { this.password = password;}
+    public void setEmail(String email) { this.email = email;}
+    public void setSignupDate(Date signupdate) { this.signupDate = signupdate;}
 
     public boolean borrow(Book book) {
         return borrowStrategy.borrow(book);

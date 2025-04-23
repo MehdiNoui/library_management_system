@@ -369,98 +369,74 @@ public class UserManagementPanel extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        // Get user data
+        // Get data from table
         String userId = (String) tableModel.getValueAt(rowIndex, 0);
-        String fullName = (String) tableModel.getValueAt(rowIndex, 1);
-        String[] nameParts = fullName.split(" ", 2);
-        String firstName = nameParts[0];
-        String lastName = nameParts.length > 1 ? nameParts[1] : "";
-        String email = (String) tableModel.getValueAt(rowIndex, 2);
-        String role = (String) tableModel.getValueAt(rowIndex, 3);
+        String firstName = (String) tableModel.getValueAt(rowIndex, 1);
+        String lastName = (String) tableModel.getValueAt(rowIndex, 2);
+        String email = (String) tableModel.getValueAt(rowIndex, 3);
         String signupDateStr = (String) tableModel.getValueAt(rowIndex, 4);
 
-        // ID Field (read-only)
+        // ID (non modifiable)
         gbc.gridx = 0;
         gbc.gridy = 0;
         formPanel.add(new JLabel("User ID:"), gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.weightx = 1.0;
         JTextField idField = new JTextField(userId, 20);
         idField.setEditable(false);
         formPanel.add(idField, gbc);
 
-        // First Name Field
+        // First Name
         gbc.gridx = 0;
         gbc.gridy = 1;
-        gbc.weightx = 0.0;
         formPanel.add(new JLabel("First Name:"), gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 1;
-        gbc.weightx = 1.0;
         JTextField firstNameField = new JTextField(firstName, 20);
         formPanel.add(firstNameField, gbc);
 
-        // Last Name Field
+        // Last Name
         gbc.gridx = 0;
         gbc.gridy = 2;
-        gbc.weightx = 0.0;
         formPanel.add(new JLabel("Last Name:"), gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 2;
-        gbc.weightx = 1.0;
         JTextField lastNameField = new JTextField(lastName, 20);
         formPanel.add(lastNameField, gbc);
 
-        // Email Field
+        // Email
         gbc.gridx = 0;
         gbc.gridy = 3;
-        gbc.weightx = 0.0;
         formPanel.add(new JLabel("Email:"), gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 3;
-        gbc.weightx = 1.0;
         JTextField emailField = new JTextField(email, 20);
         formPanel.add(emailField, gbc);
 
-        // Password Field
+        // Password (optional update)
         gbc.gridx = 0;
         gbc.gridy = 4;
-        gbc.weightx = 0.0;
         formPanel.add(new JLabel("New Password:"), gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 4;
-        gbc.weightx = 1.0;
         JPasswordField passwordField = new JPasswordField(20);
         formPanel.add(passwordField, gbc);
 
-        // Role Field
+        // Role selection (optional, not stored in table)
         gbc.gridx = 0;
         gbc.gridy = 5;
-        gbc.weightx = 0.0;
         formPanel.add(new JLabel("Role:"), gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 5;
-        gbc.weightx = 1.0;
         JComboBox<String> roleComboBox = new JComboBox<>(new String[]{"reader", "admin"});
-        roleComboBox.setSelectedItem(role);
         formPanel.add(roleComboBox, gbc);
 
-        // Signup Date Field
+        // Signup Date
         gbc.gridx = 0;
         gbc.gridy = 6;
-        gbc.weightx = 0.0;
         formPanel.add(new JLabel("Signup Date:"), gbc);
 
         gbc.gridx = 1;
-        gbc.gridy = 6;
-        gbc.weightx = 1.0;
         JTextField signupDateField = new JTextField(signupDateStr, 20);
         formPanel.add(signupDateField, gbc);
 
@@ -472,52 +448,49 @@ public class UserManagementPanel extends JPanel {
         buttonPanel.add(saveButton);
         buttonPanel.add(cancelButton);
 
-        // Add action listeners
-        saveButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Validate input
-                if (firstNameField.getText().isEmpty() || lastNameField.getText().isEmpty() ||
-                        emailField.getText().isEmpty() || signupDateField.getText().isEmpty()) {
-                    JOptionPane.showMessageDialog(dialog,
-                            "All fields except password are required.",
-                            "Validation Error",
-                            JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                try {
-                    // Parse date to validate format
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                    dateFormat.parse(signupDateField.getText());
-
-                    // Update table
-                    tableModel.setValueAt(firstNameField.getText() + " " + lastNameField.getText(), rowIndex, 1);
-                    tableModel.setValueAt(emailField.getText(), rowIndex, 2);
-                    tableModel.setValueAt(roleComboBox.getSelectedItem(), rowIndex, 3);
-                    tableModel.setValueAt(signupDateField.getText(), rowIndex, 4);
-
-                    // Close dialog
-                    dialog.dispose();
-
-                } catch (ParseException ex) {
-                    JOptionPane.showMessageDialog(dialog,
-                            "Invalid date format. Please use yyyy-MM-dd.",
-                            "Validation Error",
-                            JOptionPane.ERROR_MESSAGE);
-                }
+        // Save Action
+        saveButton.addActionListener(e -> {
+            if (firstNameField.getText().isEmpty() || lastNameField.getText().isEmpty() ||
+                    emailField.getText().isEmpty() || signupDateField.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(dialog,
+                        "All fields except password are required.",
+                        "Validation Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
             }
-        });
 
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                Date signupDate = sdf.parse(signupDateField.getText());
+
+                // Update the user object in the Library
+                for (User user : lib.getUsers()) {
+                    if (user.getId().equals(userId)) {
+                        user.setFirstname(firstNameField.getText());
+                        user.setLastname(lastNameField.getText());
+                        user.setEmail(emailField.getText());
+                        user.setSignupDate(signupDate);
+                        if (passwordField.getPassword().length > 0) {
+                            user.setPassword(new String(passwordField.getPassword()));
+                        }
+                        break;
+                    }
+                }
+
+                refreshTable();
                 dialog.dispose();
+            } catch (ParseException ex) {
+                JOptionPane.showMessageDialog(dialog,
+                        "Invalid date format. Use yyyy-MM-dd.",
+                        "Date Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
+        cancelButton.addActionListener(e -> dialog.dispose());
 
         dialog.add(formPanel, BorderLayout.CENTER);
         dialog.add(buttonPanel, BorderLayout.SOUTH);
         dialog.setVisible(true);
     }
+
 }
