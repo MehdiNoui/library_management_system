@@ -23,8 +23,8 @@ public class Library {
         ));
 
         booksDB = new ArrayList<>(List.of(
-                new Book("b01", "1984", "George Orwell", new Date(), "Dystopian", 10),
-                new Book("b02", "To Kill a Mockingbird", "Harper Lee", new Date(), "Classic", 8),
+                new Book("b01", "1984", "George Orwell", new Date(), "Dystopian", 1),
+                new Book("b02", "To Kill a Mockingbird", "Harper Lee", new Date(), "Classic", 2),
                 new Book("b03", "The Great Gatsby", "F. Scott Fitzgerald", new Date(), "Classic", 5),
                 new Book("b04", "The Great Gatsby", "F. Scott Fitzgerald", new Date(), "Classic", 5),
                 new Book("b05", "The Great Gatsby", "F. Scott Fitzgerald", new Date(), "Classic", 5)

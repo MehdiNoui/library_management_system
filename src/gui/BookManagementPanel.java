@@ -91,7 +91,7 @@ public class BookManagementPanel extends JPanel {
         tableModel.addColumn("Available");
         // Add data to table
         java.util.List<Book> books = lib.getBooks();
-        for (Book book : lib.getBooks()) {
+        for (Book book : books) {
             tableModel.addRow(new Object[]{
                     book.getId(),
                     book.getBookName(),
