@@ -43,7 +43,7 @@ public class UserManagementPanel extends JPanel {
                     user.getLastname(),
                     user.getEmail(),
                     sdf.format(user.getSignupDate()),
-
+                    user.getRole()
             });
         }
     }
@@ -89,6 +89,7 @@ public class UserManagementPanel extends JPanel {
         tableModel.addColumn("Last Name");
         tableModel.addColumn("Signup Date");
         tableModel.addColumn("Email");
+        tableModel.addColumn("Role");
 
         // Add data to table
         java.util.List<User> users = lib.getUsers();
@@ -98,7 +99,8 @@ public class UserManagementPanel extends JPanel {
                     user.getFirstname(),
                     user.getLastname(),
                     sdf.format(user.getSignupDate()),
-                    user.getEmail()
+                    user.getEmail(),
+                    user.getRole()
             });
         }
 
@@ -463,18 +465,39 @@ public class UserManagementPanel extends JPanel {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 Date signupDate = sdf.parse(signupDateField.getText());
 
-                // Update the user object in the Library
-                for (User user : lib.getUsers()) {
-                    if (user.getId().equals(userId)) {
-                        user.setFirstname(firstNameField.getText());
-                        user.setLastname(lastNameField.getText());
-                        user.setEmail(emailField.getText());
-                        user.setSignupDate(signupDate);
-                        if (passwordField.getPassword().length > 0) {
-                            user.setPassword(new String(passwordField.getPassword()));
-                        }
-                        break;
+                User existingUser = lib.getUserById(userId);
+                String selectedRole = (String) roleComboBox.getSelectedItem();
+                boolean roleChanged = !selectedRole.equalsIgnoreCase(existingUser.getRole());
+
+                if (roleChanged) {
+                    User newUser;
+                    if ("admin".equalsIgnoreCase(selectedRole)) {
+                        newUser = new Admin(
+                                userId,
+                                firstNameField.getText(),
+                                lastNameField.getText(),
+                                emailField.getText(),
+                                passwordField.getText(),
+                                signupDate
+                        );
+                    } else {
+                        newUser = new Reader(
+                                userId,
+                                firstNameField.getText(),
+                                lastNameField.getText(),
+                                emailField.getText(),
+                                passwordField.getText(),
+                                signupDate
+                        );
                     }
+                    lib.getUsers().remove(existingUser);
+                    lib.getUsers().add(newUser);
+                } else {
+                    existingUser.setFirstname(firstNameField.getText());
+                    existingUser.setLastname(lastNameField.getText());
+                    existingUser.setEmail(emailField.getText());
+                    existingUser.setSignupDate(signupDate);
+                    existingUser.setPassword(passwordField.getText());
                 }
 
                 refreshTable();
