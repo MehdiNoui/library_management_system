@@ -26,73 +26,58 @@ public class Book {
             availableBooks--;
         }
     }
-
     public void returnOne() {
         if (availableBooks < stockBooks) {
             availableBooks++;
         }
     }
-
     public void restock(int stock) {
         this.stockBooks += stock;
         this.availableBooks += stock;
     }
 
-    // Getters and setters
-    public String getId() {
-        return id;
-    }
-
     public void setId(String id) {
         this.id = id;
     }
-
-    public String getBookName() {
-        return bookName;
-    }
-
     public void setBookName(String bookName) {
         this.bookName = bookName;
     }
-
-    public String getAuthorName() {
-        return authorName;
-    }
-
     public void setAuthorName(String authorName) {
         this.authorName = authorName;
     }
-
-    public Date getPublishDate() {
-        return publishDate;
-    }
-
     public void setPublishDate(Date publishDate) {
         this.publishDate = publishDate;
     }
-
-    public String getGenre() {
-        return genre;
-    }
-
     public void setGenre(String genre) {
         this.genre = genre;
     }
-
-    public int getStockBooks() {
-        return stockBooks;
-    }
-
     public void setStockBooks(int stockBooks) {
         this.stockBooks = stockBooks;
     }
-
-    public int getAvailableBooks() {
-        return availableBooks;
-    }
-
     public void setAvailableBooks(int availableBooks) {
         this.availableBooks = availableBooks;
+    }
+
+    public String getId() {
+        return id;
+    }
+    public String getBookName() {
+        return bookName;
+    }
+    public String getAuthorName() {
+        return authorName;
+    }
+    public Date getPublishDate() {
+        return publishDate;
+    }
+    public String getGenre() {
+        return genre;
+    }
+    public int getStockBooks() {
+        return stockBooks;
+    }
+    public int getAvailableBooks() {
+        return availableBooks;
     }
 
     @Override

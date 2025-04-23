@@ -20,64 +20,51 @@ public class Borrow {
         this.status = "active";
     }
 
-    // Getters and setters
-    public int getIdBorrow() {
-        return idBorrow;
-    }
-
     public void setIdBorrow(int idBorrow) {
         this.idBorrow = idBorrow;
     }
-
-    public String getIdBook() {
-        return idBook;
-    }
-
     public void setIdBook(String idBook) {
         this.idBook = idBook;
     }
-
-    public String getIdUser() {
-        return idUser;
-    }
-
     public void setIdUser(String idUser) {
         this.idUser = idUser;
     }
-
-    public Date getBorrowDate() {
-        return borrowDate;
-    }
-
     public void setBorrowDate(Date borrowDate) {
         this.borrowDate = borrowDate;
     }
-
-    public Date getDueDate() {
-        return dueDate;
-    }
-
     public void setDueDate(Date dueDate) {
         this.dueDate = dueDate;
     }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
+    public int getIdBorrow() {
+        return idBorrow;
+    }
+    public String getIdBook() {
+        return idBook;
+    }
+    public String getIdUser() {
+        return idUser;
+    }
+    public Date getBorrowDate() {
+        return borrowDate;
+    }
+    public Date getDueDate() {
+        return dueDate;
+    }
     public Date getReturnDate() {
         return returnDate;
     }
-
     public void setReturnDate(Date returnDate) {
         this.returnDate = returnDate;
         if (returnDate != null) {
             this.status = "returned";
         }
     }
-
     public String getStatus() {
         return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     // Update status based on current date

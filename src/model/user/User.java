@@ -21,10 +21,7 @@ public abstract class User {
         this.signupDate = signupDate;
     }
 
-    public String getId() {
-        return id;
-    }
-
+    public String getId() { return id; }
     public String getFirstname() { return firstname; }
     public String getLastname() {
         return lastname;
@@ -52,11 +49,8 @@ public abstract class User {
     public boolean borrow(Book book) {
         return borrowStrategy.borrow(book);
     }
-
     public abstract boolean manage();
-
     public abstract void update(Book book);
-
     @Override
     public String toString() {
         return firstname + " " + lastname + " (" + email + ")";
