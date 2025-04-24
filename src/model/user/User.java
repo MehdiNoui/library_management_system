@@ -47,9 +47,8 @@ public abstract class User {
     public void setSignupDate(Date signupdate) { this.signupDate = signupdate;}
 
     public boolean borrow(Book book) {
-        return borrowStrategy.borrow(book);
-    }
-    public abstract boolean manage();
+        return borrowStrategy.borrow(this, book);
+    }public abstract boolean manage();
     public abstract void update(Book book);
     @Override
     public String toString() {
