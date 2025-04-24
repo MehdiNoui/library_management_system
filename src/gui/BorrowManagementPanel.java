@@ -194,6 +194,7 @@ public class BorrowManagementPanel extends JPanel {
         JButton saveButton = new JButton("Save");
         JButton cancelButton = new JButton("Cancel");
 
+        // Inside the saveButton's ActionListener:
         saveButton.addActionListener(e -> {
             try {
                 String userSelection = (String) userComboBox.getSelectedItem();
@@ -201,12 +202,25 @@ public class BorrowManagementPanel extends JPanel {
                 String userId = userSelection.substring(userSelection.lastIndexOf("(") + 1, userSelection.length() - 1);
                 String bookId = bookSelection.substring(bookSelection.lastIndexOf("(") + 1, bookSelection.length() - 1);
 
+                // Retrieve User and Book objects
+                User user = lib.getUserById(userId);
                 Book book = lib.getBookById(bookId);
-                if (book == null || book.getAvailableBooks() <= 0) {
-                    JOptionPane.showMessageDialog(dialog, "Book not available", "Error", JOptionPane.ERROR_MESSAGE);
+
+                if (user == null || book == null) {
+                    JOptionPane.showMessageDialog(dialog, "Invalid user or book", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
+                // Use the user's borrow strategy to validate the borrow
+                if (!user.borrow(book)) {
+                    String errorMsg = (user.getRole().equals("Reader"))
+                            ? "Reader cannot borrow (limit reached or book unavailable)"
+                            : "Book not available";
+                    JOptionPane.showMessageDialog(dialog, errorMsg, "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Proceed to create the borrow record
                 Borrow borrow = new Borrow(
                         Integer.parseInt(idField.getText()),
                         bookId,

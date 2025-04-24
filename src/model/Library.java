@@ -87,7 +87,6 @@ public class Library {
         borrowDB.add(borrow);
         Book book = getBookById(borrow.getIdBook());
         if (book != null) {
-            book.borrowOne();
             notifyObservers(book);
         }
     }
