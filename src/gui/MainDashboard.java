@@ -113,7 +113,7 @@ public class MainDashboard extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 // Reset all sidebar items background
                 for (Component component : sidebarPanel.getComponents()) {
-                    if (component instanceof JPanel) {
+            if (component instanceof JPanel) {
                         component.setBackground(SIDEBAR_BG);
                     }
                 }
