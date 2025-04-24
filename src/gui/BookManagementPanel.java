@@ -1,7 +1,6 @@
 package gui;
 
 import model.Book;
-import model.Borrow;
 import model.Library;
 
 import javax.swing.*;
@@ -119,7 +118,7 @@ public class BookManagementPanel extends JPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         buttonPanel.setBackground(new Color(245, 245, 250));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-
+        // Other buttons
         addButton = new JButton("Add Book");
         editButton = new JButton("Edit Book");
         deleteButton = new JButton("Delete Book");
@@ -128,6 +127,15 @@ public class BookManagementPanel extends JPanel {
         buttonPanel.add(editButton);
         buttonPanel.add(deleteButton);
         buttonPanel.add(restockButton);
+        // Refresh button
+        JButton refreshButton = new JButton("⟳ Refresh");
+        refreshButton.setFocusPainted(false);
+        refreshButton.setBackground(new Color(52, 152, 219));
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        refreshButton.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
+        refreshButton.addActionListener(e -> refreshTable()); // Calls existing refresh logic
+        buttonPanel.add(refreshButton);
 
         // Action listeners
         // Add button functionality + dialog down below
