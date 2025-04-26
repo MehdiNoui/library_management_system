@@ -72,16 +72,6 @@ public class Library {
         return usersDB;
     }
 
-    // ?
-    public User authorizeUser(String email, String password) {
-        for (User user : usersDB) {
-            if (user.getEmail().equals(email) && user.getPassword().equals(password)) {
-                return user;
-            }
-        }
-        return null;
-    }
-
     // Borrow Management
     public void borrowForUser(Borrow borrow) {
         borrowDB.add(borrow);
@@ -135,15 +125,7 @@ public class Library {
         }
     }
 
-    // Library information
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    // Statistics
+    // Stats
     public int getTotalBooks() {
         return booksDB.size();
     }
