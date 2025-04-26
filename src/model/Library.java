@@ -1,5 +1,7 @@
 package model;
 
+import model.user.Admin;
+import model.user.Reader;
 import model.user.User;
 
 import java.util.*;
@@ -14,13 +16,18 @@ public class Library {
     private List<User> observers;
 
     private Library() {
-        usersDB = new ArrayList<>();
+        usersDB = new ArrayList<>(List.of(
+                new Reader("u01", "Mehdi","Noui","email@example.com","abc",new Date()),
+                new Reader("u02", "Massi","Nissa","email@example.com","123",new Date()),
+                new Admin("u03", "Admin","Admin","email@univ-bouira.com","admin123",new Date())
+        ));
+
         booksDB = new ArrayList<>(List.of(
-                new Book("1", "1984", "George Orwell", new Date(), "Dystopian", 10),
-                new Book("2", "To Kill a Mockingbird", "Harper Lee", new Date(), "Classic", 8),
-                new Book("3", "The Great Gatsby", "F. Scott Fitzgerald", new Date(), "Classic", 5),
-                new Book("4", "The Great Gatsby", "F. Scott Fitzgerald", new Date(), "Classic", 5),
-                new Book("5", "The Great Gatsby", "F. Scott Fitzgerald", new Date(), "Classic", 5)
+                new Book("b01", "1984", "George Orwell", new Date(), "Dystopian", 1),
+                new Book("b02", "To Kill a Mockingbird", "Harper Lee", new Date(), "Classic", 2),
+                new Book("b03", "The Great Gatsby", "F. Scott Fitzgerald", new Date(), "Classic", 5),
+                new Book("b04", "The Great Gatsby", "F. Scott Fitzgerald", new Date(), "Classic", 5),
+                new Book("b05", "The Great Gatsby", "F. Scott Fitzgerald", new Date(), "Classic", 5)
         ));
         borrowDB = new ArrayList<>();
         observers = new ArrayList<>();
@@ -58,8 +65,8 @@ public class Library {
     public void signUpUser(User user) {
         usersDB.add(user);
     }
-    public void deleteUser(User user) {
-        usersDB.remove(user);
+    public void deleteUser(String userId) {
+        usersDB.removeIf(user -> user.getId().equals(userId));
     }
     public List<User> getUsers() {
         return usersDB;
@@ -80,7 +87,6 @@ public class Library {
         borrowDB.add(borrow);
         Book book = getBookById(borrow.getIdBook());
         if (book != null) {
-            book.borrowOne();
             notifyObservers(book);
         }
     }

@@ -1,16 +1,21 @@
 package gui;
 
+import model.Library;
+import model.user.Reader;
+import model.user.User;
 import window.MainWindow;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
 
 public class LoginPanel extends JPanel {
     private MainWindow mainWindow;
+    private Library library;
 
     public LoginPanel(MainWindow mainWindow) {
         this.mainWindow = mainWindow;
+        this.library = Library.getInstance();
         setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -19,7 +24,7 @@ public class LoginPanel extends JPanel {
         JLabel titleLabel = new JLabel("Login page");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
 
-        JLabel userLabel = new JLabel("Username:");
+        JLabel userLabel = new JLabel("First Name:");
         JTextField userField = new JTextField(15);
         JLabel passLabel = new JLabel("Password:");
         JPasswordField passField = new JPasswordField(15);
@@ -27,17 +32,30 @@ public class LoginPanel extends JPanel {
         JButton loginButton = new JButton("Login");
 
         loginButton.addActionListener(e -> {
-            String username = userField.getText();
-            String password = new String(passField.getPassword());
+            String firstName = userField.getText().trim();
+            String password = new String(passField.getPassword()).trim();
 
-            // Simple hardcoded check (you can expand this later)
-            if (username.equals("admin") && password.equals("admin123")) {
+            // Check for admin credentials (firstname = "admin", password = "admin123")
+            if (firstName.equalsIgnoreCase("admin") && password.equals("admin123")) {
                 mainWindow.showPanel("adminDashboard");
+                return;
+            }
+
+            // Check against regular users
+            User authenticatedUser = authenticateUser(firstName, password);
+
+            if (authenticatedUser != null) {
+                mainWindow.setCurrentReader((Reader) authenticatedUser);
+                mainWindow.showPanel("readerDashboard");
             } else {
-                JOptionPane.showMessageDialog(this, "Invalid credentials", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Invalid credentials",
+                        "Login Failed",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
 
+        // Layout code remains the same
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
@@ -61,5 +79,20 @@ public class LoginPanel extends JPanel {
         gbc.gridy++;
         gbc.gridwidth = 2;
         add(loginButton, gbc);
+    }
+
+    private User authenticateUser(String firstName, String password) {
+        if (library == null || library.getUsers() == null) {
+            return null;
+        }
+
+        for (User user : library.getUsers()) {
+            // Check against firstname (case-insensitive) and password
+            if (user.getFirstname().equalsIgnoreCase(firstName) &&
+                    user.getPassword().equals(password)) {
+                return user;
+            }
+        }
+        return null;
     }
 }

@@ -21,13 +21,8 @@ public abstract class User {
         this.signupDate = signupDate;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public String getFirstname() {
-        return firstname;
-    }
+    public String getId() { return id; }
+    public String getFirstname() { return firstname; }
     public String getLastname() {
         return lastname;
     }
@@ -43,25 +38,22 @@ public abstract class User {
     public Date getSignupDate() {
         return signupDate;
     }
+    public abstract String getRole();
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public void setFirstname(String firstname){ this.firstname = firstname;}
+    public void setLastname(String lastname){ this.lastname = lastname;}
+    public void setPassword(String password) { this.password = password;}
+    public void setEmail(String email) { this.email = email;}
+    public void setSignupDate(Date signupdate) { this.signupDate = signupdate;}
 
     public boolean borrow(Book book) {
-        return borrowStrategy.borrow(book);
-    }
-
-    public abstract boolean manage();
-
+        return borrowStrategy.borrow(this, book);
+    }public abstract boolean manage();
     public abstract void update(Book book);
-
     @Override
     public String toString() {
         return firstname + " " + lastname + " (" + email + ")";
     }
+
+
 }
