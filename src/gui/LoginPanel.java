@@ -1,6 +1,7 @@
 package gui;
 
 import model.Library;
+import model.user.Admin;
 import model.user.Reader;
 import model.user.User;
 import window.MainWindow;
@@ -30,23 +31,17 @@ public class LoginPanel extends JPanel {
         JPasswordField passField = new JPasswordField(15);
 
         JButton loginButton = new JButton("Login");
-
         loginButton.addActionListener(e -> {
             String firstName = userField.getText().trim();
             String password = new String(passField.getPassword()).trim();
-
-            // Check for admin credentials (firstname = "admin", password = "admin123")
-            if (firstName.equalsIgnoreCase("admin") && password.equals("admin123")) {
-                mainWindow.showPanel("adminDashboard");
-                return;
-            }
-
-            // Check against regular users
             User authenticatedUser = authenticateUser(firstName, password);
-
             if (authenticatedUser != null) {
-                mainWindow.setCurrentReader((Reader) authenticatedUser);
-                mainWindow.showPanel("readerDashboard");
+                if (authenticatedUser.getRole().equals("Admin")) {
+                    mainWindow.showPanel("adminDashboard");
+                } else {
+                    mainWindow.setCurrentReader((Reader) authenticatedUser);
+                    mainWindow.showPanel("readerDashboard");
+                }
             } else {
                 JOptionPane.showMessageDialog(this,
                         "Invalid credentials",
@@ -55,7 +50,7 @@ public class LoginPanel extends JPanel {
             }
         });
 
-        // Layout code remains the same
+        // Layout code
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
@@ -85,9 +80,7 @@ public class LoginPanel extends JPanel {
         if (library == null || library.getUsers() == null) {
             return null;
         }
-
         for (User user : library.getUsers()) {
-            // Check against firstname (case-insensitive) and password
             if (user.getFirstname().equalsIgnoreCase(firstName) &&
                     user.getPassword().equals(password)) {
                 return user;
