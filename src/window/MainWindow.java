@@ -34,11 +34,12 @@ public class MainWindow extends JFrame {
     }
 
     public void showPanel(String name) {
-        // If showing reader dashboard, update it with current reader
         if (name.equals("readerDashboard") && currentReader != null) {
             readerDashboard.setReader(currentReader);
         }
-
+        if (name.equals("login")) {
+            currentReader = null;
+        }
         cardLayout.show(mainPanel, name);
     }
 

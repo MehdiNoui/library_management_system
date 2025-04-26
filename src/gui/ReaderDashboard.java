@@ -4,6 +4,7 @@ import model.Book;
 import model.Borrow;
 import model.Library;
 import model.user.Reader;
+import window.MainWindow;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -283,13 +284,20 @@ public class ReaderDashboard extends JPanel {
         logoutButton.setBackground(new Color(231, 76, 60));
         logoutButton.setBorderPainted(false);
         logoutButton.setFocusPainted(false);
+        // In createSidebar() method, replace the logoutButton action listener:
         logoutButton.addActionListener(e -> {
-            // In a real application, you would handle logout logic
-            JOptionPane.showMessageDialog(this, "Logged out successfully", "Logout", JOptionPane.INFORMATION_MESSAGE);
-
-            // Find the parent window and close it
+            // Get the main window reference
             Window window = SwingUtilities.getWindowAncestor(this);
-            if (window != null) {
+            if (window instanceof MainWindow) {
+                MainWindow mainWindow = (MainWindow) window;
+                mainWindow.setCurrentReader(null); // Clear current reader
+                mainWindow.showPanel("login");
+            } else {
+                // Fallback for standalone demonstration
+                JOptionPane.showMessageDialog(this,
+                        "Logged out successfully",
+                        "Logout",
+                        JOptionPane.INFORMATION_MESSAGE);
                 window.dispose();
             }
         });
@@ -866,9 +874,6 @@ public class ReaderDashboard extends JPanel {
     private void loadFavoriteBooks() {
         // Clear existing data
         favoriteBooksModel.setRowCount(0);
-
-        // In a real application, you would load favorites from a database
-        // For demonstration, we'll add books from the library that are out of stock
         for (Book book : library.getBooks()) {
             if (book.getAvailableBooks() == 0) {
                 addFavoriteBook(book.getId(), book.getBookName(), book.getAuthorName(),
@@ -880,8 +885,6 @@ public class ReaderDashboard extends JPanel {
     private void loadAvailableBooks(DefaultTableModel model) {
         // Clear existing data
         model.setRowCount(0);
-
-        // Add all books from the library
         for (Book book : library.getBooks()) {
             model.addRow(new Object[]{
                     book.getId(),
@@ -935,10 +938,7 @@ public class ReaderDashboard extends JPanel {
 
     // Main method for demonstration
     public static void main(String[] args) {
-        // Get the library instance (already populated with data)
         Library library = Library.getInstance();
-
-        // Get the first reader from the library
         Reader reader = (Reader) library.getUsers().stream().filter(user -> user instanceof Reader).findFirst().orElse(null);
 
         if (reader == null) {
