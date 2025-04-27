@@ -17,20 +17,23 @@ public class Library {
 
     private Library() {
         usersDB = new ArrayList<>(List.of(
-                new Reader("u01", "Mehdi","Noui","email@example.com","abc",new Date()),
-                new Reader("u02", "Massi","Nissa","email@example.com","123",new Date()),
-                new Admin("u03", "Admin","Admin","email@univ-bouira.com","admin123",new Date())
+                new Reader("u01", "Mehdi","Noui","mehdi@example.com","abc",new Date()),
+                new Reader("u02", "Massi","Nissa","massil@example.com","123",new Date()),
+                new Admin("u03", "Admin","Admin","admin@univ-bouira.com","admin123",new Date())
         ));
-
         booksDB = new ArrayList<>(List.of(
-                new Book("b01", "1984", "George Orwell", new Date(), "Dystopian", 1),
-                new Book("b02", "To Kill a Mockingbird", "Harper Lee", new Date(), "Classic", 2),
-                new Book("b03", "The Great Gatsby", "F. Scott Fitzgerald", new Date(), "Classic", 5),
-                new Book("b04", "The Great Gatsby", "F. Scott Fitzgerald", new Date(), "Classic", 5),
-                new Book("b05", "The Great Gatsby", "F. Scott Fitzgerald", new Date(), "Classic", 5)
-        ));
+                new Book("b01", "Clean Code", "Robert C. Martin", new Date(), "Software Engineering", 5),
+                new Book("b02", "Introduction to Algorithms", "Thomas H. Cormen", new Date(), "Algorithms", 3),
+                new Book("b03", "Design Patterns: Elements of Reusable Object-Oriented Software",
+                        "Erich Gamma", new Date(), "Software Design", 4)   ));
         borrowDB = new ArrayList<>();
         observers = new ArrayList<>();
+    }
+    private static Date addDays(Date date, int days) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.DATE, days);
+        return cal.getTime();
     }
 
     // Singleton instance
@@ -70,16 +73,6 @@ public class Library {
     }
     public List<User> getUsers() {
         return usersDB;
-    }
-
-    // ?
-    public User authorizeUser(String email, String password) {
-        for (User user : usersDB) {
-            if (user.getEmail().equals(email) && user.getPassword().equals(password)) {
-                return user;
-            }
-        }
-        return null;
     }
 
     // Borrow Management
@@ -135,15 +128,7 @@ public class Library {
         }
     }
 
-    // Library information
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    // Statistics
+    // Stats
     public int getTotalBooks() {
         return booksDB.size();
     }

@@ -4,10 +4,10 @@ import model.Book;
 import model.Borrow;
 import model.Library;
 import model.user.Reader;
+import window.MainWindow;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.text.SimpleDateFormat;
@@ -284,12 +284,16 @@ public class ReaderDashboard extends JPanel {
         logoutButton.setBorderPainted(false);
         logoutButton.setFocusPainted(false);
         logoutButton.addActionListener(e -> {
-            // In a real application, you would handle logout logic
-            JOptionPane.showMessageDialog(this, "Logged out successfully", "Logout", JOptionPane.INFORMATION_MESSAGE);
-
-            // Find the parent window and close it
             Window window = SwingUtilities.getWindowAncestor(this);
-            if (window != null) {
+            if (window instanceof MainWindow) {
+                MainWindow mainWindow = (MainWindow) window;
+                mainWindow.setCurrentReader(null); // Clear current reader
+                mainWindow.showPanel("login");
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Logged out successfully",
+                        "Logout",
+                        JOptionPane.INFORMATION_MESSAGE);
                 window.dispose();
             }
         });
@@ -304,7 +308,6 @@ public class ReaderDashboard extends JPanel {
     }
 
     private void updateSidebarSelection(JPanel selectedItem) {
-        // Get the sidebar panel
         Component[] components = getComponents();
         for (Component component : components) {
             if (component instanceof JPanel) {
@@ -314,11 +317,9 @@ public class ReaderDashboard extends JPanel {
                     if (mainComponent instanceof JPanel) {
                         JPanel sidebarPanel = (JPanel) mainComponent;
                         if (sidebarPanel.getLayout() instanceof BoxLayout) {
-                            // Found the sidebar panel
                             Component[] sidebarItems = sidebarPanel.getComponents();
                             for (Component item : sidebarItems) {
                                 if (item instanceof JPanel && item != selectedItem) {
-                                    // Check if it's a menu item (not title, user panel, or logout)
                                     if (((JPanel) item).getComponentCount() > 0 &&
                                             ((JPanel) item).getComponent(0) instanceof JLabel) {
                                         JLabel label = (JLabel) ((JPanel) item).getComponent(0);
@@ -331,7 +332,6 @@ public class ReaderDashboard extends JPanel {
                                     }
                                 }
                             }
-                            // Set the selected item background
                             selectedItem.setBackground(SIDEBAR_SELECTED);
                             break;
                         }
@@ -484,44 +484,6 @@ public class ReaderDashboard extends JPanel {
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         actionPanel.setBackground(CONTENT_BG);
 
-        JButton returnButton = new JButton("Return Selected Book");
-        returnButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        returnButton.setBackground(new Color(231, 76, 60));
-        returnButton.setForeground(Color.WHITE);
-        returnButton.setBorderPainted(false);
-        returnButton.setFocusPainted(false);
-        returnButton.addActionListener(e -> {
-            int selectedRow = borrowedBooksTable.getSelectedRow();
-            if (selectedRow >= 0) {
-                String bookId = (String) borrowedBooksModel.getValueAt(selectedRow, 0);
-
-                // Find the borrow record
-                List<Borrow> userBorrows = library.getBorrows().stream()
-                        .filter(b -> b.getIdUser().equals(reader.getId()) &&
-                                b.getIdBook().equals(bookId) &&
-                                b.getReturnDate() == null)
-                        .collect(Collectors.toList());
-
-                if (!userBorrows.isEmpty()) {
-                    Borrow borrow = userBorrows.get(0);
-                    borrow.setReturnDate(new Date());
-                    library.returnBook(borrow);
-
-                    JOptionPane.showMessageDialog(this,
-                            "Book '" + library.getBookById(bookId).getBookName() + "' has been returned.",
-                            "Book Returned",
-                            JOptionPane.INFORMATION_MESSAGE);
-
-                    loadBorrowedBooks(); // Refresh the list
-                }
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Please select a book to return.",
-                        "No Selection",
-                        JOptionPane.WARNING_MESSAGE);
-            }
-        });
-
         JButton refreshButton = new JButton("Refresh List");
         refreshButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         refreshButton.setBackground(new Color(52, 152, 219));
@@ -530,7 +492,6 @@ public class ReaderDashboard extends JPanel {
         refreshButton.setFocusPainted(false);
         refreshButton.addActionListener(e -> loadBorrowedBooks());
 
-        actionPanel.add(returnButton);
         actionPanel.add(Box.createRigidArea(new Dimension(10, 0)));
         actionPanel.add(refreshButton);
         panel.add(actionPanel, BorderLayout.SOUTH);
@@ -832,12 +793,10 @@ public class ReaderDashboard extends JPanel {
     private void loadBorrowedBooks() {
         // Clear existing data
         borrowedBooksModel.setRowCount(0);
-
         // Get all borrows for this user
         List<Borrow> userBorrows = library.getBorrows().stream()
                 .filter(b -> b.getIdUser().equals(reader.getId()))
                 .collect(Collectors.toList());
-
         // Add each borrow to the table
         for (Borrow borrow : userBorrows) {
             // Find the book
@@ -866,9 +825,6 @@ public class ReaderDashboard extends JPanel {
     private void loadFavoriteBooks() {
         // Clear existing data
         favoriteBooksModel.setRowCount(0);
-
-        // In a real application, you would load favorites from a database
-        // For demonstration, we'll add books from the library that are out of stock
         for (Book book : library.getBooks()) {
             if (book.getAvailableBooks() == 0) {
                 addFavoriteBook(book.getId(), book.getBookName(), book.getAuthorName(),
@@ -880,8 +836,6 @@ public class ReaderDashboard extends JPanel {
     private void loadAvailableBooks(DefaultTableModel model) {
         // Clear existing data
         model.setRowCount(0);
-
-        // Add all books from the library
         for (Book book : library.getBooks()) {
             model.addRow(new Object[]{
                     book.getId(),
@@ -935,10 +889,7 @@ public class ReaderDashboard extends JPanel {
 
     // Main method for demonstration
     public static void main(String[] args) {
-        // Get the library instance (already populated with data)
         Library library = Library.getInstance();
-
-        // Get the first reader from the library
         Reader reader = (Reader) library.getUsers().stream().filter(user -> user instanceof Reader).findFirst().orElse(null);
 
         if (reader == null) {

@@ -128,12 +128,12 @@ public class BookManagementPanel extends JPanel {
         buttonPanel.add(deleteButton);
         buttonPanel.add(restockButton);
         // Refresh button
-        JButton refreshButton = new JButton("⟳ Refresh");
-        refreshButton.setFocusPainted(false);
+        JButton refreshButton = new JButton("Refresh List");
+        refreshButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         refreshButton.setBackground(new Color(52, 152, 219));
         refreshButton.setForeground(Color.WHITE);
-        refreshButton.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        refreshButton.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
+        refreshButton.setBorderPainted(false);
+        refreshButton.setFocusPainted(false);
         refreshButton.addActionListener(e -> refreshTable()); // Calls existing refresh logic
         buttonPanel.add(refreshButton);
 

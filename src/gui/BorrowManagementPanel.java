@@ -20,7 +20,7 @@ public class BorrowManagementPanel extends JPanel {
     private JTable borrowsTable;
     private DefaultTableModel tableModel;
     private JTextField searchField;
-    private JButton addButton;
+    private JButton refreshButton;
     private JButton returnButton;
 
     public BorrowManagementPanel() {
@@ -101,16 +101,19 @@ public class BorrowManagementPanel extends JPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         buttonPanel.setBackground(new Color(245, 245, 250));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-
-        addButton = new JButton("New Borrow");
+        // Buttons
         returnButton = new JButton("Return Book");
-
-        addButton.addActionListener(e -> showAddBorrowDialog());
         returnButton.addActionListener(e -> handleReturn());
-
-        buttonPanel.add(addButton);
+        refreshButton = new JButton("Refresh List");
+        refreshButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        refreshButton.setBackground(new Color(52, 152, 219));
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setBorderPainted(false);
+        refreshButton.setFocusPainted(false);
+        refreshButton.addActionListener(e -> refreshTable()); // Calls existing refresh logic
+        //adding to panel..
         buttonPanel.add(returnButton);
-
+        buttonPanel.add(refreshButton);
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
@@ -126,7 +129,6 @@ public class BorrowManagementPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Book already returned", "Info", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
-
             int confirm = JOptionPane.showConfirmDialog(this, "Confirm return?", "Confirm", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 int borrowId = (int) tableModel.getValueAt(selectedRow, 0);
@@ -143,119 +145,5 @@ public class BorrowManagementPanel extends JPanel {
         } else {
             JOptionPane.showMessageDialog(this, "Select a borrow first", "Warning", JOptionPane.WARNING_MESSAGE);
         }
-    }
-
-    private void showAddBorrowDialog() {
-        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "New Borrow", true);
-        dialog.setSize(500, 300);
-        dialog.setLayout(new BorderLayout());
-
-        JPanel formPanel = new JPanel(new GridBagLayout());
-        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 5, 5, 5);
-
-        // ID Field
-        JTextField idField = new JTextField(20);
-        idField.setText(String.valueOf(lib.getBorrows().isEmpty() ? 1001 :
-                lib.getBorrows().get(lib.getBorrows().size() - 1).getIdBorrow() + 1));
-        idField.setEditable(false);
-
-        // User ComboBox
-        JComboBox<String> userComboBox = new JComboBox<>();
-        lib.getUsers().forEach(user ->
-                userComboBox.addItem(user.getFullName() + " (" + user.getId() + ")"));
-
-        // Book ComboBox
-        JComboBox<String> bookComboBox = new JComboBox<>();
-        lib.getBooks().forEach(book ->
-                bookComboBox.addItem(book.getBookName() + " (" + book.getId() + ")"));
-
-        // Date Fields
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        JTextField borrowDateField = new JTextField(sdf.format(new Date()));
-        borrowDateField.setEditable(false);
-
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, 14);
-        JTextField dueDateField = new JTextField(sdf.format(cal.getTime()));
-
-        // Form layout
-        addField(formPanel, gbc, 0, "Borrow ID:", idField);
-        addField(formPanel, gbc, 1, "User:", userComboBox);
-        addField(formPanel, gbc, 2, "Book:", bookComboBox);
-        addField(formPanel, gbc, 3, "Borrow Date:", borrowDateField);
-        addField(formPanel, gbc, 4, "Due Date:", dueDateField);
-
-        // Buttons
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton saveButton = new JButton("Save");
-        JButton cancelButton = new JButton("Cancel");
-
-        // Inside the saveButton's ActionListener:
-        saveButton.addActionListener(e -> {
-            try {
-                String userSelection = (String) userComboBox.getSelectedItem();
-                String bookSelection = (String) bookComboBox.getSelectedItem();
-                String userId = userSelection.substring(userSelection.lastIndexOf("(") + 1, userSelection.length() - 1);
-                String bookId = bookSelection.substring(bookSelection.lastIndexOf("(") + 1, bookSelection.length() - 1);
-
-                // Retrieve User and Book objects
-                User user = lib.getUserById(userId);
-                Book book = lib.getBookById(bookId);
-
-                if (user == null || book == null) {
-                    JOptionPane.showMessageDialog(dialog, "Invalid user or book", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                // Use the user's borrow strategy to validate the borrow
-                if (!user.borrow(book)) {
-                    String errorMsg = (user.getRole().equals("Reader"))
-                            ? "Reader cannot borrow (limit reached or book unavailable)"
-                            : "Book not available";
-                    JOptionPane.showMessageDialog(dialog, errorMsg, "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                // Proceed to create the borrow record
-                Borrow borrow = new Borrow(
-                        Integer.parseInt(idField.getText()),
-                        bookId,
-                        userId,
-                        sdf.parse(borrowDateField.getText()),
-                        sdf.parse(dueDateField.getText())
-                );
-
-                lib.borrowForUser(borrow);
-                refreshTable();
-                dialog.dispose();
-            } catch (ParseException ex) {
-                JOptionPane.showMessageDialog(dialog, "Invalid date format", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        cancelButton.addActionListener(e -> dialog.dispose());
-        buttonPanel.add(saveButton);
-        buttonPanel.add(cancelButton);
-
-        dialog.add(formPanel, BorderLayout.CENTER);
-        dialog.add(buttonPanel, BorderLayout.SOUTH);
-        dialog.setLocationRelativeTo(this);
-        dialog.setVisible(true);
-    }
-
-    private void addField(JPanel panel, GridBagConstraints gbc, int row, String label, JComponent field) {
-        gbc.gridx = 0;
-        gbc.gridy = row;
-        panel.add(new JLabel(label), gbc);
-
-        gbc.gridx = 1;
-        gbc.weightx = 1.0;
-        panel.add(field, gbc);
-
-        gbc.weightx = 0.0;
     }
 }

@@ -1,5 +1,7 @@
 package gui;
 
+import window.MainWindow;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -77,13 +79,26 @@ public class AdminDashboard extends JPanel {
         logoutPanel.setBackground(SIDEBAR_BG);
         logoutPanel.setMaximumSize(new Dimension(250, 60));
         logoutPanel.setName("logoutPanel"); // Add a name to identify it later
-
         JButton logoutButton = new JButton("Logout");
         logoutButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         logoutButton.setForeground(TEXT_COLOR);
         logoutButton.setBackground(new Color(231, 76, 60));
         logoutButton.setBorderPainted(false);
         logoutButton.setFocusPainted(false);
+        logoutButton.addActionListener(e -> {
+            Window window = SwingUtilities.getWindowAncestor(this);
+            if (window instanceof MainWindow) {
+                MainWindow mainWindow = (MainWindow) window;
+                mainWindow.showPanel("login");
+            } else {
+                // Fallback for standalone demonstration
+                JOptionPane.showMessageDialog(this,
+                        "Logged out successfully",
+                        "Logout",
+                        JOptionPane.INFORMATION_MESSAGE);
+                window.dispose();
+            }
+        });
 
         logoutPanel.add(logoutButton, BorderLayout.CENTER);
         logoutPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
