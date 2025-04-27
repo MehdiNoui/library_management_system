@@ -101,16 +101,23 @@ public class BorrowManagementPanel extends JPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         buttonPanel.setBackground(new Color(245, 245, 250));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-
+        // Buttons
         addButton = new JButton("New Borrow");
         returnButton = new JButton("Return Book");
-
         addButton.addActionListener(e -> showAddBorrowDialog());
         returnButton.addActionListener(e -> handleReturn());
-
+        // Refresh button
+        JButton refreshButton = new JButton("Refresh List");
+        refreshButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        refreshButton.setBackground(new Color(52, 152, 219));
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setBorderPainted(false);
+        refreshButton.setFocusPainted(false);
+        refreshButton.addActionListener(e -> refreshTable()); // Calls existing refresh logic
+        //adding to panel..
         buttonPanel.add(addButton);
         buttonPanel.add(returnButton);
-
+        buttonPanel.add(refreshButton);
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
@@ -126,7 +133,6 @@ public class BorrowManagementPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Book already returned", "Info", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
-
             int confirm = JOptionPane.showConfirmDialog(this, "Confirm return?", "Confirm", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 int borrowId = (int) tableModel.getValueAt(selectedRow, 0);

@@ -8,10 +8,7 @@ import java.awt.*;
 public class LibraryManagementSystem {
     public static void main(String[] args) {
         try {
-            // Set system look and feel
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-
-            // Custom colors and styling
             customizeUI();
         } catch (Exception e) {
             e.printStackTrace();
